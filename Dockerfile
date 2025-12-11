@@ -15,9 +15,9 @@ WORKDIR /app
 COPY --from=build /app/target/gesresto.jar app.jar
 
 # Variables d'environnement pour Neon PostgreSQL
-ENV DB_URL=${DB_URL}
-ENV DB_USER=${DB_USER}
-ENV DB_PASSWORD=${DB_PASSWORD}
+ENV DB_URL=$DB_URL
+ENV DB_USER=$DB_USER
+ENV DB_PASSWORD=$DB_PASSWORD
 
 # Pour la sécurité : définir le timezone si nécessaire
 ENV TZ=UTC
