@@ -93,7 +93,7 @@ public class BurgerRepositoryImpl implements BurgerRepository {
     public List<Burger> selectAll() {
         try {
             Connection conn = database.getConnection();
-            PreparedStatement ps = conn.prepareStatement("SELECT * FROM burger");
+            PreparedStatement ps = conn.prepareStatement("SELECT * FROM burger ORDER BY id ASC");
 
             return database.<Burger>fetchAll(ps, this::toEntity);
         } catch (SQLException e) {
