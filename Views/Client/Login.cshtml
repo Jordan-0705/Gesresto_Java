@@ -1,0 +1,48 @@
+@{
+    ViewData["Title"] = "Connexion Client";
+}
+
+<link rel="stylesheet" href="@Url.Content("~/css/connexion.css")" />
+
+<div class="login-container">
+    <div class="login-left">
+        <h1>GesResto</h1>
+        <p>
+            Gérez votre restaurant simplement : suivez vos commandes, gérez vos menus, burgers et compléments,
+            organisez les livraisons et les paiements, et assurez un service rapide et efficace à vos clients.
+        </p>
+        <p>Veuillez vous connecter pour vous identifier et commencer la gestion de votre restaurant.</p>
+    </div>
+    <div class="login-right">
+        <h2>Connexion Client :</h2>
+        <form method="post" asp-action="Login">
+            <div>
+                <label>Login :</label>
+                <input type="text" name="login" required />
+            </div>
+            <div>
+                <label>Mot de passe :</label>
+                <input type="password" name="password" required />
+            </div>
+            @if (TempData["Message"] != null)
+            {
+                <p style="color:green">@TempData["Message"]</p>
+            }
+            @if (ViewBag.Error != null)
+            {
+                <p style="color:red">@ViewBag.Error</p>
+            }
+            <button type="submit">Se connecter</button>
+        </form>
+        <p>Pas de compte ? <a asp-action="Register">Créer un compte</a></p>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,215 @@
+@model GesResto.ViewModels.CommandeViewModel
+@{
+    ViewData["Title"] = "Compléments optionnels";
+}
+
+<link rel="stylesheet" href="~/css/passerCommande.css" />
+
+<form method="post" asp-action="FinaliserAvecComplements">
+    <h2>Compléments optionnels</h2>
+    <p class="text-muted">Vous pouvez ajouter des frites ou des boissons supplémentaires à votre commande (optionnel).</p>
+    
+    <!-- IMPORTANT: Les champs de base -->
+    <input type="hidden" name="CommandeType" value="@ViewBag.CommandeType" />
+    <input type="hidden" name="ZoneId" value="@ViewBag.ZoneId" />
+    <input type="hidden" name="ConsoType" value="@ViewBag.ConsoType" />
+    
+    <!-- Les burgers/menus sont déjà dans TempData, pas besoin de les repasser -->
+    
+    <!-- Section Frites -->
+    @if (ViewBag.Frites != null)
+    {
+        <h3>🍟 Frites supplémentaires :</h3>
+        <div class="complements-container">
+            @{
+                var fritesList = ViewBag.Frites as IEnumerable<Models.Complement> ?? new List<Models.Complement>();
+            }
+            
+            @foreach (var frite in fritesList)
+            {
+                <div class="complement-card">
+                    <div class="complement-header">
+                        <input type="checkbox" 
+                               id="frite_@frite.Id"
+                               name="ComplementSelections[@frite.Id].IsSelected" 
+                               value="true" 
+                               class="complement-checkbox"
+                               onchange="toggleComplementControls('frite', @frite.Id, this.checked)" />
+                        <input type="hidden" name="ComplementSelections[@frite.Id].ComplementId" value="@frite.Id" />
+                        <input type="hidden" name="ComplementSelections[@frite.Id].ComplementNom" value="@frite.Nom" />
+                        <input type="hidden" name="ComplementSelections[@frite.Id].Prix" value="@frite.Prix" />
+                        <input type="hidden" name="ComplementSelections[@frite.Id].Type" value="Frites" />
+                        <label for="frite_@frite.Id" class="complement-name">@frite.Nom</label>
+                    </div>
+                    <div class="complement-details">
+                        <span class="complement-price">@frite.Prix.ToString("0.00") FCFA</span>
+                        <div class="quantity-control">
+                            <button type="button" class="btn-minus" 
+                                    onclick="changeComplementQuantity('frite', @frite.Id, -1)" 
+                                    id="fminus_@frite.Id"
+                                    disabled>-</button>
+                            <input type="number" 
+                                   name="ComplementSelections[@frite.Id].Quantite"
+                                   id="fqty_@frite.Id"
+                                   value="1" 
+                                   min="1" 
+                                   max="5" 
+                                   class="complement-quantity" 
+                                   disabled />
+                            <button type="button" class="btn-plus" 
+                                    onclick="changeComplementQuantity('frite', @frite.Id, 1)"
+                                    id="fplus_@frite.Id"
+                                    disabled>+</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    
+    <!-- Section Boissons -->
+    @if (ViewBag.Boissons != null)
+    {
+        <h3>🥤 Boissons supplémentaires :</h3>
+        <div class="complements-container">
+            @{
+                var boissonsList = ViewBag.Boissons as IEnumerable<Models.Complement> ?? new List<Models.Complement>();
+            }
+            
+            @foreach (var boisson in boissonsList)
+            {
+                <div class="complement-card">
+                    <div class="complement-header">
+                        <input type="checkbox" 
+                               id="boisson_@boisson.Id"
+                               name="ComplementSelections[@boisson.Id].IsSelected" 
+                               value="true" 
+                               class="complement-checkbox"
+                               onchange="toggleComplementControls('boisson', @boisson.Id, this.checked)" />
+                        <input type="hidden" name="ComplementSelections[@boisson.Id].ComplementId" value="@boisson.Id" />
+                        <input type="hidden" name="ComplementSelections[@boisson.Id].ComplementNom" value="@boisson.Nom" />
+                        <input type="hidden" name="ComplementSelections[@boisson.Id].Prix" value="@boisson.Prix" />
+                        <input type="hidden" name="ComplementSelections[@boisson.Id].Type" value="Boisson" />
+                        <label for="boisson_@boisson.Id" class="complement-name">@boisson.Nom</label>
+                    </div>
+                    <div class="complement-details">
+                        <span class="complement-price">@boisson.Prix.ToString("0.00") FCFA</span>
+                        <div class="quantity-control">
+                            <button type="button" class="btn-minus" 
+                                    onclick="changeComplementQuantity('boisson', @boisson.Id, -1)" 
+                                    id="bminus_@boisson.Id"
+                                    disabled>-</button>
+                            <input type="number" 
+                                   name="ComplementSelections[@boisson.Id].Quantite"
+                                   id="bqty_@boisson.Id"
+                                   value="1" 
+                                   min="1" 
+                                   max="5" 
+                                   class="complement-quantity" 
+                                   disabled />
+                            <button type="button" class="btn-plus" 
+                                    onclick="changeComplementQuantity('boisson', @boisson.Id, 1)"
+                                    id="bplus_@boisson.Id"
+                                    disabled>+</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    
+    <!-- Résumé du prix actuel -->
+    <div class="price-preview">
+        <h4>💰 Total estimé :</h4>
+        <div class="price-breakdown">
+            <div class="price-item">
+                <span>Burgers/Menus :</span>
+                <span id="basePrice">0,00 FCFA</span>
+            </div>
+            <div class="price-item">
+                <span>Compléments :</span>
+                <span id="complementsPrice">0,00 FCFA</span>
+            </div>
+            <div class="price-total">
+                <strong>Total :</strong>
+                <strong id="totalPrice">0,00 FCFA</strong>
+            </div>
+        </div>
+    </div>
+    
+    <div class="form-actions" style="margin-top: 30px;">
+        <button type="submit" class="btn btn-success">
+            ✅ Finaliser la commande avec compléments
+        </button>
+        @* <button type="button" onclick="skipComplements()" class="btn btn-secondary">
+            Passer sans compléments
+        </button> *@
+        <a asp-action="PasserCommande" class="btn btn-link">Annuler</a>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        function toggleComplementControls(type, complementId, isChecked) {
+            const minusBtn = document.getElementById(type + 'minus_' + complementId);
+            const plusBtn = document.getElementById(type + 'plus_' + complementId);
+            const qtyInput = document.getElementById(type + 'qty_' + complementId);
+            
+            if (minusBtn && plusBtn && qtyInput) {
+                minusBtn.disabled = !isChecked;
+                plusBtn.disabled = !isChecked;
+                qtyInput.disabled = !isChecked;
+            }
+            updatePrice();
+        }
+        
+        function changeComplementQuantity(type, complementId, change) {
+            const qtyInput = document.getElementById(type + 'qty_' + complementId);
+            if (!qtyInput) return;
+            
+            let currentValue = parseInt(qtyInput.value) || 1;
+            let newValue = currentValue + change;
+            
+            if (newValue < 1) newValue = 1;
+            if (newValue > 5) newValue = 5;
+            
+            qtyInput.value = newValue;
+            updatePrice();
+        }
+        
+        function updatePrice() {
+            // Récupérer le prix de base depuis TempData (vous devrez l'envoyer depuis le contrôleur)
+            let basePrice = 0; // À calculer côté serveur
+            let complementsPrice = 0;
+            
+            // Calculer le prix des compléments
+            document.querySelectorAll('.complement-checkbox:checked').forEach(checkbox => {
+                const card = checkbox.closest('.complement-card');
+                const priceElement = card.querySelector('.complement-price');
+                const quantityInput = card.querySelector('.complement-quantity');
+                
+                if (priceElement && quantityInput) {
+                    const priceText = priceElement.textContent.replace(' FCFA', '').replace(',', '.');
+                    const price = parseFloat(priceText) || 0;
+                    const quantity = parseInt(quantityInput.value) || 1;
+                    complementsPrice += price * quantity;
+                }
+            });
+            
+            // Mettre à jour l'affichage
+            document.getElementById('basePrice').textContent = basePrice.toFixed(2).replace('.', ',') + ' FCFA';
+            document.getElementById('complementsPrice').textContent = complementsPrice.toFixed(2).replace('.', ',') + ' FCFA';
+            document.getElementById('totalPrice').textContent = (basePrice + complementsPrice).toFixed(2).replace('.', ',') + ' FCFA';
+        }
+        
+        function skipComplements() {
+            // Rediriger vers la version sans compléments
+            window.location.href = '@Url.Action("FinaliserSansComplements")';
+        }
+        
+        // Initialiser au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            updatePrice();
+        });
+    </script>
+}

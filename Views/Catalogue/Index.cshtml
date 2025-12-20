@@ -1,0 +1,199 @@
+@* @model Tuple<IEnumerable<Models.Burger>, IEnumerable<Models.Menu>, IEnumerable<Models.Complement>> *@
+@model ViewModels.PagedCatalogueViewModel
+
+@{
+    ViewData["Title"] = "Catalogue";
+    var userName = ViewBag.UserName as string ?? "Utilisateur";
+}
+<link rel="stylesheet" href="~/css/site.css" />
+
+<header class="header">
+    <div class="logo">🍔 <span>GesResto</span></div>
+    <nav class="nav">
+        <a asp-controller="Accueil" asp-action="Index" class="nav-btn">Accueil</a>
+        <a asp-controller="Catalogue" asp-action="Index" class="nav-btn active">📘 Voir Notre Catalogue</a>
+        <a asp-controller="MesCommandes" asp-action="Index" class="nav-btn">🧾 Commandes</a>
+    </nav>
+    <div class="user">
+        👤 <span>@ViewBag.UserName</span>
+        <a asp-controller="Client" asp-action="Logout" 
+        class="logout-link"
+        onclick="return confirm('Déconnexion ?')">
+            🚪 Déconnexion
+        </a>
+    </div>
+</header>
+
+<section class="categories">
+    <button class="cat-btn @(Model.Filter == "Burger" ? "active" : "")" 
+        onclick="location.href='@Url.Action("Index", "Catalogue", new { filter = "Burger" })'">🍔 Burgers</button>
+<button class="cat-btn @(Model.Filter == "Complement" ? "active" : "")" 
+        onclick="location.href='@Url.Action("Index", "Catalogue", new { filter = "Complement" })'">➕ Compléments</button>
+<button class="cat-btn @(Model.Filter == "Menu" ? "active" : "")" 
+        onclick="location.href='@Url.Action("Index", "Catalogue", new { filter = "Menu" })'">📦 Menus</button>
+    
+</section>
+<button class="order-btn" onclick="location.href='@Url.Action("PasserCommande", "Commande")'">Passer une commande</button>
+
+<section class="search-bar">
+    <form method="get" asp-action="Index">
+        <!-- Champ caché pour transmettre le filtre actuel -->
+        <input type="hidden" name="filter" value="@Model.Filter" />
+
+        <input type="text" name="search" placeholder="Rechercher ..." value="@Model.Search">
+        <button type="submit">Rechercher →</button>
+    </form>
+</section>
+
+@* <p>Filtre : @Model.Filter</p>
+<p>Nombre Burgers : @Model.Burgers.Count()</p>
+<p>Nombre Menus : @Model.Menus.Count()</p>
+<p>Nombre Complements : @Model.Complements.Count()</p> *@
+
+
+<section class="table-container">
+    @* Tableau pour les Burgers *@
+    @if (Model.Filter == "Burger")
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Photo</th>
+                    <th>Nom</th>
+                    <th>Prix</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Burgers.Count(); i++)
+                {
+                    var b = Model.Burgers.ElementAt(i);
+                    <tr class="@(i % 2 == 0 ? "even-row" : "odd-row")">
+                        <td>@b.Id</td>
+                        <td><img src="@b.Photo" alt="@b.Nom" style="width:50px;height:50px;border-radius:8px;"></td>
+                        <td>@b.Nom</td>
+                        <td>@b.Prix.ToString("N0") FCFA</td>
+                        <td>
+                            <form asp-controller="Commande" asp-action="PasserCommande" method="post">
+                                <input type="hidden" name="produitId" value="@b.Id" />
+                                <button type="submit" class="cmd-btn">Ajouter</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    @* Tableau pour les Menus *@
+    @if (Model.Filter == "Menu")
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Photo</th>
+                    <th>Burger</th>
+                    <th>Frites</th>
+                    <th>Boisson</th>
+                    <th>Prix</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Menus.Count(); i++)
+                {
+                    var m = Model.Menus.ElementAt(i);
+                    <tr class="@(i % 2 == 0 ? "even-row" : "odd-row")">
+                        <td>@m.Id</td>
+                        <td><img src="@m.Photo" alt="@m.Burger.Nom" style="width:50px;height:50px;border-radius:8px;"></td>
+                        <td>@m.Burger.Nom</td>
+                        <td>@m.ComplementF.Nom</td>
+                        <td>@m.ComplementB.Nom</td>
+                        <td>@m.Prix.ToString("N0") FCFA</td>
+                        <td>
+                            <form asp-controller="Commande" asp-action="PasserCommande" method="post">
+                                <input type="hidden" name="produitId" value="@m.Id" />
+                                <button type="submit" class="cmd-btn">Ajouter</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    @* Tableau pour les Compléments *@
+    @if (Model.Filter == "Complement")
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Photo</th>
+                    <th>Nom</th>
+                    <th>Type</th>
+                    <th>Prix</th>
+                    @* <th>Action</th> *@
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.Complements.Count(); i++)
+                {
+                    var c = Model.Complements.ElementAt(i);
+                    <tr class="@(i % 2 == 0 ? "even-row" : "odd-row")">
+                        <td>@c.Id</td>
+                        <td><img src="@c.Photo" alt="@c.Nom" style="width:50px;height:50px;border-radius:8px;"></td>
+                        <td>@c.Nom</td>
+                        <td>@c.ComplementType</td>
+                        <td>@c.Prix.ToString("N0") FCFA</td>
+                        @* <td>
+                            <form asp-controller="Commande" asp-action="AddItem" method="post">
+                                <input type="hidden" name="produitId" value="@c.Id" />
+                                <button type="submit" class="cmd-btn">Ajouter</button>
+                            </form>
+                        </td> *@
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>
+
+@* <style>
+    .even-row { background-color: #ffffff; }
+    .odd-row { background-color: #f0f0f0; }
+</style> *@
+
+@{
+    int currentPage = Model.CurrentPage;
+    int totalPages = Model.TotalPages;
+}
+
+@if (totalPages > 1)
+{
+    <div class="pagination">
+        @if (currentPage > 1)
+        {
+            <a class="page-btn"
+               href="@Url.Action("Index", new {
+                    filter = Model.Filter,
+                    search = Model.Search,
+                    page = currentPage - 1
+               })">⬅ Précédent</a>
+        }
+
+        <span>Page @currentPage / @totalPages</span>
+
+        @if (currentPage < totalPages)
+        {
+            <a class="page-btn"
+               href="@Url.Action("Index", new {
+                    filter = Model.Filter,
+                    search = Model.Search,
+                    page = currentPage + 1
+               })">Suivant ➡</a>
+        }
+    </div>
+}

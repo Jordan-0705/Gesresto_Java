@@ -1,0 +1,365 @@
+@model Models.Commande
+@{
+    ViewData["Title"] = "Confirmation de commande";
+}
+
+<div style="background: #ffeaa7; padding: 10px; margin: 10px; border-radius: 5px; display: none;" id="debugDiv">
+    <strong>Debug Info:</strong><br />
+    Prix: @Model.Prix<br />
+    Burgers: @(Model.CommandeBurgers?.Count ?? 0)<br />
+    Menus: @(Model.CommandeMenus?.Count ?? 0)<br />
+    CommandeType: @Model.CommandeType<br />
+</div>
+
+<link rel="stylesheet" href="~/css/passerCommande.css" />
+
+<div class="confirmation-container">
+    <div class="confirmation-header">
+        <h1 class="text-success">✅ Commande confirmée !</h1>
+        <p class="lead">Votre commande a été enregistrée avec succès.</p>
+    </div>
+
+    <div class="confirmation-details">
+        <h3>Détails de votre commande</h3>
+        
+        <div class="detail-row">
+            <span class="detail-label">Numéro de commande :</span>
+            <span class="detail-value">@Model.Code</span>
+        </div>
+        
+        <div class="detail-row">
+            <span class="detail-label">Date :</span>
+            <span class="detail-value">@Model.Date.ToString("dd/MM/yyyy HH:mm")</span>
+        </div>
+        
+        <div class="detail-row">
+            <span class="detail-label">Type de commande :</span>
+            <span class="detail-value">@Model.CommandeType</span>
+        </div>
+        
+        <div class="detail-row">
+            <span class="detail-label">Type de consommation :</span>
+            <span class="detail-value">@Model.ConsoType</span>
+        </div>
+        
+        <div class="detail-row">
+            <span class="detail-label">Zone :</span>
+            <span class="detail-value">@(Model.Zone?.Nom ?? "Non spécifiée")</span>
+        </div>
+        
+        <div class="detail-row">
+            <span class="detail-label">Statut :</span>
+            @{
+                var badgeClass = Model.EtatCommande == Models.Enums.EtatCommande.EnAttente ? "badge-warning" : "badge-success";
+            }
+            <span class="badge @badgeClass">
+                @Model.EtatCommande
+            </span>
+        </div>
+    </div>
+
+    <!-- Section des burgers commandés -->
+    @if (Model.CommandeBurgers != null && Model.CommandeBurgers.Any())
+    {
+        <div class="commande-section">
+            <h4>🍔 Burgers commandés</h4>
+            <table class="commande-table">
+                <thead>
+                    <tr>
+                        <th>Burger</th>
+                        <th>Quantité</th>
+                        <th>Prix unitaire</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cb in Model.CommandeBurgers)
+                    {
+                        <tr>
+                            <td>@(cb.Burger?.Nom ?? "N/A")</td>
+                            <td>@cb.Quantite</td>
+                            <td>@(cb.Burger?.Prix.ToString("0.00") ?? "0.00") FCFA</td>
+                            <td>@((cb.Quantite * (cb.Burger?.Prix ?? 0)).ToString("0.00")) FCFA</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <!-- Section des menus commandés -->
+    @if (Model.CommandeMenus != null && Model.CommandeMenus.Any())
+    {
+        <div class="commande-section">
+            <h4>🍽️ Menus commandés</h4>
+            <table class="commande-table">
+                <thead>
+                    <tr>
+                        <th>Menu</th>
+                        <th>Contenu</th>
+                        <th>Quantité</th>
+                        <th>Prix unitaire</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cm in Model.CommandeMenus)
+                    {
+                        <tr>
+                            <td>@(cm.Menu?.Nom ?? "N/A")</td>
+                            <td>
+                                @cm.Menu?.Burger?.Nom
+                                @if (cm.Menu?.ComplementF != null)
+                                {
+                                    <br />@: + @cm.Menu.ComplementF.Nom
+                                }
+                                @if (cm.Menu?.ComplementB != null)
+                                {
+                                    <br />@: + @cm.Menu.ComplementB.Nom
+                                }
+                            </td>
+                            <td>@cm.Quantite</td>
+                            <td>@(cm.Menu?.Prix.ToString("0.00") ?? "0.00") FCFA</td>
+                            <td>@((cm.Quantite * (cm.Menu?.Prix ?? 0)).ToString("0.00")) FCFA</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <!-- Résumé du prix -->
+    <div class="price-summary">
+        <div class="total-row">
+            <span class="total-label">Total de la commande :</span>
+            <span class="total-price">@Model.Prix.ToString("0.00") FCFA</span>
+        </div>
+    </div>
+
+    <div class="confirmation-actions">
+        <a href="@Url.Action("Index", "Catalogue")" class="btn btn-primary">
+            Retour au catalogue
+        </a>
+        @if (Model.Paiement == null)
+        {
+            <a href="@Url.Action("Payer", "MesCommandes", new { id = Model.Id })" class="btn btn-success">
+                Payer maintenant
+            </a>
+        }
+    </div>
+
+    <div class="confirmation-info">
+        <p><strong>📞 Contact :</strong> Votre numéro de commande est <strong>@Model.Code</strong>. Gardez-le pour toute référence.</p>
+        <p><strong>⏱️ Temps d'attente estimé :</strong> 15-25 minutes</p>
+        @if (Model.ConsoType == Models.Enums.ConsoType.ALivrer)
+        {
+            <p><strong>🚚 Livraison :</strong> Votre commande sera livrée à l'adresse associée à votre compte.</p>
+        }
+    </div>
+</div>
+
+<style>
+    .confirmation-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .confirmation-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .confirmation-header h1 {
+        color: #28a745;
+        margin-bottom: 10px;
+    }
+
+    .confirmation-details {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .detail-value {
+        color: #212529;
+    }
+
+    .commande-section {
+        margin: 30px 0;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .commande-section h4 {
+        color: #495057;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .commande-table {
+        width: 100%;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .commande-table thead {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .commande-table th {
+        padding: 12px 15px;
+        text-align: left;
+    }
+
+    .commande-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .commande-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .price-summary {
+        margin-top: 30px;
+        padding: 25px;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 10px;
+        border: 2px solid #007bff;
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1.3em;
+        font-weight: bold;
+    }
+
+    .total-label {
+        color: #495057;
+    }
+
+    .total-price {
+        color: #28a745;
+        font-size: 1.5em;
+    }
+
+    .confirmation-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin: 40px 0;
+        flex-wrap: wrap;
+    }
+
+    .confirmation-info {
+        margin-top: 30px;
+        padding: 20px;
+        background: #e8f4fc;
+        border-radius: 10px;
+        border-left: 5px solid #007bff;
+    }
+
+    .confirmation-info p {
+        margin-bottom: 10px;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+    }
+
+    .badge-warning {
+        background-color: #ffc107;
+        color: #212529;
+    }
+
+    .badge-success {
+        background-color: #28a745;
+        color: white;
+    }
+</style>
+
+<style>
+    /* Media queries séparées */
+    @@media (max-width: 768px) {
+        .confirmation-container {
+            padding: 20px;
+            margin: 20px;
+        }
+        
+        .confirmation-actions {
+            flex-direction: column;
+        }
+        
+        .commande-table {
+            display: block;
+            overflow-x: auto;
+        }
+        
+        .detail-row {
+            flex-direction: column;
+            gap: 5px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .confirmation-container {
+            padding: 15px;
+            margin: 10px;
+        }
+        
+        .confirmation-header h1 {
+            font-size: 1.5em;
+        }
+        
+        .commande-table th,
+        .commande-table td {
+            padding: 8px 10px;
+            font-size: 0.9em;
+        }
+    }
+</style>
+
+<script>
+    // Pour afficher les infos debug (appuyer sur Ctrl+D)
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'd') {
+            e.preventDefault();
+            var debugDiv = document.getElementById('debugDiv');
+            debugDiv.style.display = debugDiv.style.display === 'none' ? 'block' : 'none';
+        }
+    });
+</script>

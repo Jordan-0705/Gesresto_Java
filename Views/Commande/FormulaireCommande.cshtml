@@ -1,0 +1,184 @@
+@model GesResto.ViewModels.CommandeViewModel
+@{
+    ViewData["Title"] = "Choisir votre commande";
+    string commandeType = ViewBag.CommandeType;
+}
+
+<link rel="stylesheet" href="~/css/passerCommande.css" />
+
+<form method="post" asp-action="TraiterSelection">
+    <h2>@commandeType</h2>
+    
+    <input type="hidden" asp-for="CommandeType" value="@commandeType" />
+    <input type="hidden" asp-for="ZoneId" value="@ViewBag.ZoneId" />
+    <input type="hidden" asp-for="ConsoType" value="@ViewBag.ConsoType" />
+
+    @if (commandeType == "Burger")
+    {
+        <h3>Choisissez un ou plusieurs burgers :</h3>
+        <div class="items-container">
+            @{
+                var burgers = ViewBag.Burgers as IEnumerable<Models.Burger> ?? new List<Models.Burger>();
+            }
+            
+            @foreach (var burger in burgers)
+            {
+                <div class="item-card">
+                    <div class="item-header">
+                        <!-- IMPORTANT: Le nom doit correspondre au Dictionnaire -->
+                        <input type="checkbox" 
+                               id="burger_@burger.Id"
+                               name="BurgerSelections[@burger.Id].IsSelected" 
+                               value="true" 
+                               class="item-checkbox"
+                               onchange="toggleBurgerControls(@burger.Id, this.checked)" />
+                        <input type="hidden" name="BurgerSelections[@burger.Id].BurgerId" value="@burger.Id" />
+                        <input type="hidden" name="BurgerSelections[@burger.Id].BurgerNom" value="@burger.Nom" />
+                        <input type="hidden" name="BurgerSelections[@burger.Id].Prix" value="@burger.Prix" />
+                        <label for="burger_@burger.Id" class="item-name">@burger.Nom</label>
+                    </div>
+                    <div class="item-details">
+                        <span class="item-price">@burger.Prix.ToString("0.00") FCFA</span>
+                        <div class="quantity-control">
+                            <button type="button" class="btn-minus" 
+                                    onclick="changeQuantity(@burger.Id, -1)" 
+                                    id="minus_@burger.Id"
+                                    disabled>-</button>
+                            <input type="number" 
+                                   name="BurgerSelections[@burger.Id].Quantite"
+                                   id="qty_@burger.Id"
+                                   value="1" 
+                                   min="1" 
+                                   max="10" 
+                                   class="quantity-input" 
+                                   disabled />
+                            <button type="button" class="btn-plus" 
+                                    onclick="changeQuantity(@burger.Id, 1)"
+                                    id="plus_@burger.Id"
+                                    disabled>+</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="form-actions">
+            <button type="submit" name="action" value="continuer" class="btn btn-primary">
+                Continuer vers les compléments
+            </button>
+            <button type="submit" name="action" value="terminer" class="btn btn-secondary">
+                Terminer sans compléments
+            </button>
+            <a asp-action="PasserCommande" class="btn btn-link">Retour</a>
+        </div>
+    }
+    else if (commandeType == "Menu")
+    {
+        <h3>Choisissez un ou plusieurs menus :</h3>
+        <div class="items-container">
+            @{
+                var menus = ViewBag.Menus as IEnumerable<Models.Menu> ?? new List<Models.Menu>();
+            }
+            
+            @foreach (var menu in menus)
+            {
+                <div class="item-card">
+                    <div class="item-header">
+                        <input type="checkbox" 
+                               id="menu_@menu.Id"
+                               name="MenuSelections[@menu.Id].IsSelected" 
+                               value="true" 
+                               class="item-checkbox"
+                               onchange="toggleMenuControls(@menu.Id, this.checked)" />
+                        <input type="hidden" name="MenuSelections[@menu.Id].MenuId" value="@menu.Id" />
+                        <input type="hidden" name="MenuSelections[@menu.Id].MenuNom" value="@menu.Nom" />
+                        <input type="hidden" name="MenuSelections[@menu.Id].Prix" value="@menu.Prix" />
+                        <label for="menu_@menu.Id" class="item-name">@menu.Nom</label>
+                    </div>
+                    <div class="item-details">
+                        <span class="item-price">@menu.Prix.ToString("0.00") FCFA</span>
+                        <div class="quantity-control">
+                            <button type="button" class="btn-minus" 
+                                    onclick="changeMenuQuantity(@menu.Id, -1)" 
+                                    id="mminus_@menu.Id"
+                                    disabled>-</button>
+                            <input type="number" 
+                                   name="MenuSelections[@menu.Id].Quantite"
+                                   id="mqty_@menu.Id"
+                                   value="1" 
+                                   min="1" 
+                                   max="10" 
+                                   class="quantity-input" 
+                                   disabled />
+                            <button type="button" class="btn-plus" 
+                                    onclick="changeMenuQuantity(@menu.Id, 1)"
+                                    id="mplus_@menu.Id"
+                                    disabled>+</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="form-actions">
+        <button type="submit" name="action" value="terminer" class="btn btn-secondary">
+            Terminer Commande
+        </button>
+        <a asp-action="PasserCommande" class="btn btn-link">Retour</a>
+    </div>
+    }
+
+    
+</form>
+
+@section Scripts {
+    <script>
+        function toggleBurgerControls(burgerId, isChecked) {
+            const minusBtn = document.getElementById('minus_' + burgerId);
+            const plusBtn = document.getElementById('plus_' + burgerId);
+            const qtyInput = document.getElementById('qty_' + burgerId);
+            
+            if (minusBtn && plusBtn && qtyInput) {
+                minusBtn.disabled = !isChecked;
+                plusBtn.disabled = !isChecked;
+                qtyInput.disabled = !isChecked;
+            }
+        }
+        
+        function changeQuantity(burgerId, change) {
+            const qtyInput = document.getElementById('qty_' + burgerId);
+            if (!qtyInput) return;
+            
+            let currentValue = parseInt(qtyInput.value) || 1;
+            let newValue = currentValue + change;
+            
+            if (newValue < 1) newValue = 1;
+            if (newValue > 10) newValue = 10;
+            
+            qtyInput.value = newValue;
+        }
+        
+        function toggleMenuControls(menuId, isChecked) {
+            const minusBtn = document.getElementById('mminus_' + menuId);
+            const plusBtn = document.getElementById('mplus_' + menuId);
+            const qtyInput = document.getElementById('mqty_' + menuId);
+            
+            if (minusBtn && plusBtn && qtyInput) {
+                minusBtn.disabled = !isChecked;
+                plusBtn.disabled = !isChecked;
+                qtyInput.disabled = !isChecked;
+            }
+        }
+        
+        function changeMenuQuantity(menuId, change) {
+            const qtyInput = document.getElementById('mqty_' + menuId);
+            if (!qtyInput) return;
+            
+            let currentValue = parseInt(qtyInput.value) || 1;
+            let newValue = currentValue + change;
+            
+            if (newValue < 1) newValue = 1;
+            if (newValue > 10) newValue = 10;
+            
+            qtyInput.value = newValue;
+        }
+    </script>
+}

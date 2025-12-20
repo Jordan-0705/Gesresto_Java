@@ -1,0 +1,52 @@
+@model ViewModels.PagedCatalogueViewModel
+@{
+    ViewData["Title"] = "Accueil";
+    var userName = ViewBag.UserName as string ?? "Utilisateur";
+}
+<link rel="stylesheet" href="~/css/accueil.css" />
+
+<header class="header">
+    <div class="logo">🍔 <span>GesResto</span></div>
+    <nav class="nav">
+        <a asp-controller="Accueil" asp-action="Index" class="nav-btn active">Accueil</a>
+        <a asp-controller="Catalogue" asp-action="Index" class="nav-btn">📘 Voir Notre Catalogue</a>
+        <a asp-controller="MesCommandes" asp-action="Index" class="nav-btn">🧾 Commandes</a>
+    </nav>
+   <div class="user">
+        👤 <span>@ViewBag.UserName</span>
+        <a asp-controller="Client" asp-action="Logout" 
+        class="logout-link"
+        onclick="return confirm('Déconnexion ?')">
+            🚪 Déconnexion
+        </a>
+    </div>
+</header>
+
+<main class="main-banner">
+    <div class="banner-text">
+        <h1>Découvrez nos burgers, menus et compléments préparés avec soin.</h1>
+        <p>Commandez facilement selon vos envies, que ce soit sur place, à emporter ou en livraison.</p>
+    </div>
+</main>
+
+
+<style>
+    .logout-link {
+        margin-left: 15px;
+        padding: 6px 12px;
+        background: #6c757d;
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: all 0.3s;
+    }
+
+    .logout-link:hover {
+        background: #5a6268;
+        text-decoration: none;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style>

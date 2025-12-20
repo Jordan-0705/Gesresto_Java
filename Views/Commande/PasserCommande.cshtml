@@ -1,0 +1,42 @@
+@model dynamic
+@{
+    ViewData["Title"] = "Passer une commande";
+}
+
+<link rel="stylesheet" href="~/css/passerCommande.css" />
+
+<form method="post" asp-action="ChoisirCommande">
+    <h2>Passer une commande</h2>
+    <div>
+        <label>Type de commande :</label>
+        <select name="CommandeType" required>
+            <option value="">-- Sélectionnez --</option>
+            <option value="Burger">Burger</option>
+            <option value="Menu">Menu</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Zone :</label>
+        <select name="ZoneId" required>
+            <option value="">-- Sélectionnez une zone --</option>
+            @foreach (var zone in ViewBag.Zones as IEnumerable<Models.Zone>)
+            {
+                <option value="@zone.Id">@zone.Nom</option>
+            }
+        </select>
+    </div>
+
+    <div>
+        <label>Type de consommation :</label>
+        <select name="ConsoType" required>
+            <option value="">-- Sélectionnez --</option>
+            @foreach (var type in Enum.GetValues(typeof(Models.Enums.ConsoType)))
+            {
+                <option value="@type">@type</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit">Suivant</button>
+</form>

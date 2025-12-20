@@ -1,0 +1,257 @@
+@model IEnumerable<Models.Commande>
+@{
+    ViewData["Title"] = "Mes Commandes";
+    var userName = ViewBag.UserName as string ?? "Utilisateur";
+}
+<link rel="stylesheet" href="~/css/site.css" />
+
+<header class="header">
+    <div class="logo">🍔 <span>GesResto</span></div>
+    <nav class="nav">
+        <a asp-controller="Accueil" asp-action="Index" class="nav-btn">Accueil</a>
+        <a asp-controller="Catalogue" asp-action="Index" class="nav-btn">📘 Voir Notre Catalogue</a>
+        <a asp-controller="MesCommandes" asp-action="Index" class="nav-btn active">🧾 Mes Commandes</a>
+        <a asp-controller="Commande" asp-action="PasserCommande" class="nav-btn">➕ Nouvelle Commande</a>
+    </nav>
+    <div class="user">
+        👤 <span>@ViewBag.UserName</span>
+        <a asp-controller="Client" asp-action="Logout" 
+        class="logout-link"
+        onclick="return confirm('Déconnexion ?')">
+            🚪 Déconnexion
+        </a>
+    </div>
+</header>
+
+<section class="search-bar">
+    <h2>📋 Mes Commandes</h2>
+</section>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Message"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-error">
+        @TempData["Error"]
+    </div>
+}
+
+<section class="table-container">
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <p>📭 Vous n'avez pas encore de commandes.</p>
+            <a asp-controller="Commande" asp-action="PasserCommande" class="order-btn">
+                Passer votre première commande
+            </a>
+        </div>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>N° Commande</th>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Zone</th>
+                    <th>Prix Total</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var commande in Model)
+                {
+                    var statusClass = commande.EtatCommande switch
+                    {
+                        Models.Enums.EtatCommande.EnAttente => "status-pending",
+                        Models.Enums.EtatCommande.Valide => "status-validated",
+                        Models.Enums.EtatCommande.Termine => "status-completed",
+                        Models.Enums.EtatCommande.Annule => "status-cancelled",
+                        _ => ""
+                    };
+                    
+                    <tr>
+                        <td><strong>@commande.Code</strong></td>
+                        <td>@commande.Date.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@commande.CommandeType</td>
+                        <td>@(commande.Zone?.Nom ?? "N/A")</td>
+                        <td>@commande.Prix.ToString("N0") FCFA</td>
+                        <td>
+                            <span class="status-badge @statusClass">
+                                @commande.EtatCommande
+                            </span>
+                        </td>
+                        <td class="actions-cell">
+                            @if (commande.EtatCommande == Models.Enums.EtatCommande.EnAttente)
+                            {
+                                <a asp-action="Payer" asp-route-id="@commande.Id" class="btn-payer">
+                                    💳 Payer
+                                </a>
+                            }
+                            
+                            @if (commande.EtatCommande != Models.Enums.EtatCommande.Annule)
+                            {
+                                <form asp-action="Annuler" method="post" class="inline-form">
+                                    <input type="hidden" name="id" value="@commande.Id" />
+                                    <button type="submit" class="btn-annuler" 
+                                            onclick="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?')">
+                                        ❌ Annuler
+                                    </button>
+                                </form>
+                            }
+                            @* <a asp-action="Details" asp-route-id="@commande.Id" class="btn-details">
+                                👁️ Détails
+                            </a> *@
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>
+
+<style>
+    /* Styles pour les statuts */
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+    
+    .status-validated {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .status-completed {
+        background-color: #cce5ff;
+        color: #004085;
+        border: 1px solid #b8daff;
+    }
+    
+    .status-cancelled {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    /* Styles pour les boutons d'actions */
+    .actions-cell {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .cmd-btn {
+        padding: 6px 14px;
+        border-radius: 15px;
+        border: none;
+        background: #2ea043;
+        color: white;
+        cursor: pointer;
+    }
+    .cmd-btn:hover {
+        background: #ffffff;
+        color: #2ea043;
+        border: 2px solid #2ea043;
+    }
+    
+    .btn-payer, .btn-annuler, .btn-details {
+        padding: 6px 14px;
+        border-radius: 15px;
+        
+        
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: none;
+        color: white;
+    }
+    
+    .btn-payer {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .btn-payer:hover {
+        background: #ffffff;
+        color: #2ea043;
+        border: 2px solid #2ea043;
+    }
+    
+    .btn-annuler {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .btn-annuler:hover {
+        background: #ffffff;
+        color: #dc3545;
+        border: 2px solid #dc3545;
+    }
+    
+    @* .btn-details {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .btn-details:hover {
+        background-color: #5a6268;
+        transform: translateY(-2px);
+    } *@
+    
+    .inline-form {
+        display: inline;
+        margin: 0;
+    }
+    
+    /* État vide */
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        border: 2px dashed #dee2e6;
+    }
+    
+    .empty-state p {
+        font-size: 18px;
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
+    
+    /* Alertes */
+    .alert {
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+</style>

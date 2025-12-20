@@ -1,0 +1,105 @@
+@* @model GesResto.ViewModels.CommandeSimpleViewModel
+@{
+    ViewData["Title"] = "Choisir votre commande";
+    string commandeType = ViewBag.CommandeType;
+}
+
+<link rel="stylesheet" href="~/css/passerCommande.css" />
+
+<form method="post" asp-action="TraiterSelectionSimple">
+    <h2>@commandeType</h2>
+    
+    <input type="hidden" name="CommandeType" value="@commandeType" />
+    <input type="hidden" name="ZoneId" value="@ViewBag.ZoneId" />
+    <input type="hidden" name="ConsoType" value="@ViewBag.ConsoType" />
+
+    @if (commandeType == "Burger")
+    {
+        <h3>Choisissez un ou plusieurs burgers :</h3>
+        <div class="items-container">
+            @{
+                var burgers = ViewBag.Burgers as IEnumerable<Models.Burger> ?? new List<Models.Burger>();
+            }
+            
+            @foreach (var burger in burgers)
+            {
+                <div class="item-card">
+                    <div class="item-header">
+                        <input type="checkbox" 
+                               id="burger_@burger.Id"
+                               name="burgerIds" 
+                               value="@burger.Id" 
+                               class="item-checkbox"
+                               data-prix="@burger.Prix" />
+                        <label for="burger_@burger.Id" class="item-name">@burger.Nom</label>
+                        <input type="hidden" name="burgerPrices[@burger.Id]" value="@burger.Prix" />
+                    </div>
+                    <div class="item-details">
+                        <span class="item-price">@burger.Prix.ToString("0.00") €</span>
+                        <div class="quantity-control">
+                            <button type="button" class="btn-minus" onclick="changeQuantity(this, -1, @burger.Id)">-</button>
+                            <input type="number" 
+                                   id="qty_@burger.Id"
+                                   name="burgerQuantities[@burger.Id]" 
+                                   value="1" 
+                                   min="1" 
+                                   max="10" 
+                                   class="quantity-input" 
+                                   disabled />
+                            <button type="button" class="btn-plus" onclick="changeQuantity(this, 1, @burger.Id)">+</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else if (commandeType == "Menu")
+    {
+        <h3>Choisissez un ou plusieurs menus :</h3>
+        <!-- Même structure pour les menus -->
+    }
+
+    <div class="form-actions">
+        <button type="submit" name="action" value="continuer" class="btn btn-primary">
+            Continuer vers les compléments
+        </button>
+        <button type="submit" name="action" value="terminer" class="btn btn-secondary">
+            Terminer sans compléments
+        </button>
+        <a asp-action="PasserCommande" class="btn btn-link">Retour</a>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        function changeQuantity(button, change, burgerId) {
+            const input = document.getElementById('qty_' + burgerId);
+            if (!input) return;
+            
+            let currentValue = parseInt(input.value) || 0;
+            let newValue = currentValue + change;
+            
+            if (newValue < 1) newValue = 1;
+            if (newValue > 10) newValue = 10;
+            
+            input.value = newValue;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.item-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const burgerId = this.value;
+                    const input = document.getElementById('qty_' + burgerId);
+                    const card = this.closest('.item-card');
+                    const minusBtn = card.querySelector('.btn-minus');
+                    const plusBtn = card.querySelector('.btn-plus');
+                    
+                    const isChecked = this.checked;
+                    input.disabled = !isChecked;
+                    if (minusBtn) minusBtn.disabled = !isChecked;
+                    if (plusBtn) plusBtn.disabled = !isChecked;
+                });
+            });
+        });
+    </script>
+} *@

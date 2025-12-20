@@ -1,0 +1,126 @@
+@using Models.Enums
+@model Models.Commande
+@{
+    ViewData["Title"] = "Détails de la commande";
+}
+
+<header class="header">
+    <div class="logo">🍔 <span>GesResto</span></div>
+    <nav class="nav">
+        <a asp-controller="Accueil" asp-action="Index" class="nav-btn">Accueil</a>
+        <a asp-controller="Catalogue" asp-action="Index" class="nav-btn">📘 Catalogue</a>
+        <a asp-controller="MesCommandes" asp-action="Index" class="nav-btn active">🧾 Mes Commandes</a>
+    </nav>
+    <div class="user">👤 <span>@ViewBag.UserName</span></div>
+</header>
+
+<div class="container">
+    <h2>Détails de la commande @Model.Code</h2>
+    
+    <div class="commande-card">
+        <div class="commande-info">
+            <p><strong>Date :</strong> @Model.Date.ToString("dd/MM/yyyy HH:mm")</p>
+            <p><strong>Statut :</strong> 
+                <span class="status-badge @Model.EtatCommande.ToString().ToLower()">
+                    @Model.EtatCommande
+                </span>
+            </p>
+            <p><strong>Type :</strong> @Model.CommandeType</p>
+            <p><strong>Consommation :</strong> @Model.ConsoType</p>
+            <p><strong>Zone :</strong> @(Model.Zone?.Nom ?? "Non spécifiée")</p>
+            <p><strong>Prix total :</strong> <span class="prix">@Model.Prix.ToString("N0") FCFA</span></p>
+        </div>
+        
+        @if (Model.Paiement != null)
+        {
+            <div class="paiement-info">
+                <h3>💳 Informations de paiement</h3>
+                <p><strong>Méthode :</strong> @Model.Paiement.PaiementType</p>
+                <p><strong>Date du paiement :</strong> @Model.Paiement.Date.ToString("dd/MM/yyyy HH:mm")</p>
+                <p><strong>Montant payé :</strong> @Model.Paiement.Montant.ToString("N0") FCFA</p>
+            </div>
+        }
+        
+        <div class="actions">
+            <a asp-action="Index" class="btn btn-secondary">← Retour aux commandes</a>
+            
+            @if (Model.EtatCommande == EtatCommande.EnAttente)
+            {
+                <a asp-action="Payer" asp-route-id="@Model.Id" class="btn btn-success">
+                    💳 Payer cette commande
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .commande-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        margin-top: 20px;
+    }
+    
+    .commande-info p {
+        margin: 12px 0;
+        font-size: 16px;
+    }
+    
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .enattente { background: #fff3cd; color: #856404; }
+    .valide { background: #d4edda; color: #155724; }
+    .termine { background: #cce5ff; color: #004085; }
+    .annule { background: #f8d7da; color: #721c24; }
+    
+    .prix {
+        font-size: 1.4em;
+        color: #28a745;
+        font-weight: bold;
+    }
+    
+    .paiement-info {
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 2px dashed #dee2e6;
+    }
+    
+    .actions {
+        margin-top: 30px;
+        display: flex;
+        gap: 15px;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .btn-success {
+        background: #28a745;
+        color: white;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+</style>
