@@ -1,0 +1,146 @@
+/* Style général de la page */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Conteneur principal de la connexion */
+.login-container {
+    display: flex;
+    width: 900px;
+    max-width: 90%;
+    background: #ffffff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Partie gauche */
+.login-left {
+    flex: 1;
+    background: linear-gradient(135deg, #4cafef, #1c2b6b);
+    color: #ffffff;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.login-left h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+.login-left p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+/* Partie droite */
+.login-right {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.login-right h2 {
+    margin-bottom: 25px;
+    color: #333;
+}
+
+/* Formulaire */
+.login-right form div {
+    margin-bottom: 20px;
+}
+
+.login-right label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #555;
+}
+
+.login-right input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border 0.3s, box-shadow 0.3s;
+}
+
+.login-right input:focus {
+    border-color: #4cafef;
+    box-shadow: 0 0 5px rgba(76, 175, 239, 0.5);
+    outline: none;
+}
+
+/* Bouton */
+.login-right button {
+    width: 100%;
+    padding: 12px;
+    background: #4cafef;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.login-right button:hover {
+    background: #1c75d6;
+    transform: translateY(-2px);
+}
+
+/* Lien de création de compte */
+.login-right p {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.login-right a {
+    color: #4cafef;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.login-right a:hover {
+    text-decoration: underline;
+}
+
+/* Messages d'erreur */
+.error-message {
+    color: #dc3545;
+    text-align: center;
+    font-weight: bold;
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .login-container {
+        flex-direction: column;
+    }
+
+    .login-left, .login-right {
+        padding: 30px;
+    }
+
+    .login-left {
+        text-align: center;
+    }
+}

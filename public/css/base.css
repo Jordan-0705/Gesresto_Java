@@ -1,0 +1,139 @@
+/* === STYLES DE BASE === */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fa;
+    padding: 20px;
+}
+
+/* === HEADER / NAVIGATION === */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    padding: 15px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 25px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 1.8em;
+    font-weight: bold;
+}
+
+.logo span {
+    font-weight: bold;
+    font-size: 1.5em;
+    margin-left: 5px;
+    color: #007bff;
+}
+
+.nav {
+    display: flex;
+    gap: 15px;
+}
+
+.nav-btn {
+    padding: 10px 20px;
+    border-radius: 20px;
+    background: #0d6efd;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    cursor: pointer;
+}
+
+.nav-btn:hover {
+    background: #ffffff;
+    color: #0d6efd;
+    border: 2px solid #0d6efd;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.nav-btn.active {
+    background: #ffffff;
+    color: #0d6efd;
+    border: 2px solid #0d6efd;
+}
+
+/* === USER SECTION === */
+.user {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.user span {
+    color: #333;
+    font-weight: 600;
+}
+
+.logout-link {
+    margin-left: 15px;
+    padding: 8px 16px;
+    background: #6c757d;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.logout-link:hover {
+    background: #5a6268;
+    text-decoration: none;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* === CONTENU PRINCIPAL === */
+.main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* === FOOTER === */
+.footer {
+    margin-top: 40px;
+    padding: 20px;
+    text-align: center;
+    color: #6c757d;
+    font-size: 14px;
+    border-top: 1px solid #dee2e6;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px;
+    }
+    
+    .nav {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .user {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .main-content {
+        padding: 10px;
+    }
+}

@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion Gestionnaire{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/securiry/login.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="login-container">
+    <div class="login-left">
+        <h1>GesResto</h1>
+        <p>
+            Gérez votre restaurant simplement : suivez vos commandes, gérez vos menus, burgers et compléments,
+            organisez les livraisons et les paiements, et assurez un service rapide et efficace à vos clients.
+        </p>
+        <p>Veuillez vous connecter pour vous identifier et commencer la gestion de votre restaurant.</p>
+    </div>
+    <div class="login-right">
+        <h2>Connexion Gestionnaire :</h2>
+        
+        <form method="post" action="{{ path('app_login') }}">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+            
+            <div>
+                <label for="login">Login :</label>
+                <input type="text" id="login" name="login" value="{{ last_username }}" required autofocus />
+            </div>
+            
+            <div>
+                <label for="password">Mot de passe :</label>
+                <input type="password" id="password" name="password" required />
+            </div>
+            
+            {% if error %}
+                <div class="error-message">
+                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                </div>
+            {% endif %}
+            
+            <button type="submit">Se connecter</button>
+        </form>
+        
+        {# <p>Pas de compte ? <a href="{{ path('app_register') }}">Créer un compte</a></p> #}
+    </div>
+</div>
+<footer class="footer">
+        <p>&copy; {{ "now"|date("Y") }} GesResto - Système de gestion de restaurant</p>
+    </footer>
+{% endblock %}

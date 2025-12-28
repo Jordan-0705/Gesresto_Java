@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}GesResto - Gestion de Restaurant{% endblock %}</title>
+        
+        {% block stylesheets %}
+        <link rel="stylesheet" href="{{ asset('css/base.css') }}">
+        {% endblock %}
+        
+        {% block javascripts %}
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Confirmation pour la déconnexion
+                    const logoutLinks = document.querySelectorAll('.logout-link');
+                    
+                    logoutLinks.forEach(link => {
+                        link.addEventListener('click', function(e) {
+                            if (!confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+                                e.preventDefault();
+                            }
+                        });
+                    });
+                });
+            </script>
+        {% endblock %}
+    </head>
+    <body>
+        {% if app.user %}
+            {# === HEADER POUR GESTIONNAIRE CONNECTÉ === #}
+            <header class="header">
+                <div class="logo">🍔 <span>GesResto</span></div>
+                
+                <nav class="nav">
+                    <a href="{{ path('app_dashboard') }}" 
+                       class="nav-btn {% if app.request.attributes.get('_route') == 'app_dashboard' %}active{% endif %}">
+                        🏠 Tableau de bord
+                    </a>
+                    <a href="{{ path('app_commandes_index') }}"
+                       class="nav-btn {% if 'commandes' in app.request.attributes.get('_route') %}active{% endif %}">
+                       {# onclick="event.preventDefault(); alert('Gestion des commandes - Fonctionnalité en cours de développement');" #}
+                        📝 Commandes
+                    </a>
+                    <a href="{{ path('app_livraisons_index') }}"
+                       class="nav-btn {% if 'livraisons' in app.request.attributes.get('_route') %}active{% endif %}">
+                       {# onclick="event.preventDefault(); alert('Gestion des livraisons - Fonctionnalité en cours de développement');" #}
+                        🚚 Livraisons
+                    </a>
+                </nav>
+                
+                <div class="user">
+                    👤 <span>{{ app.user.nomComplet|default(app.user.nom) }}</span>
+                    <a href="{{ path('app_logout') }}" class="logout-link">
+                        🚪 Déconnexion
+                    </a>
+                </div>
+            </header>
+        {% endif %}
+        
+        <main class="main-content">
+            {# === MESSAGES FLASH === #}
+            {% for message in app.flashes('success') %}
+                <div style="padding: 15px; border-radius: 8px; margin: 20px 0; background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            
+            {% for message in app.flashes('error') %}
+                <div style="padding: 15px; border-radius: 8px; margin: 20px 0; background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            
+            {% for message in app.flashes('warning') %}
+                <div style="padding: 15px; border-radius: 8px; margin: 20px 0; background-color: #fff3cd; border: 1px solid #ffeaa7; color: #856404;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            
+            {% for message in app.flashes('info') %}
+                <div style="padding: 15px; border-radius: 8px; margin: 20px 0; background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            
+            {# === CONTENU DES PAGES === #}
+            {% block body %}{% endblock %}
+        </main>
+    </body>
+</html>

@@ -1,0 +1,122 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Livraisons - GesResto{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/livraison/index.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    {# === EN-TÊTE === #}
+    <div class="page-header">
+        <h1>🚚 Gestion des Livraisons</h1>
+        <p class="subtitle">Organisez et suivez les livraisons de votre restaurant</p>
+        
+        <div class="header-actions">
+            <a href="{{ path('app_livraisons_affecter') }}" class="btn btn-primary">
+                📦 Affecter des commandes
+            </a>
+        </div>
+    </div>
+
+    {# === TABLEAU DES LIVRAISONS === #}
+    <div class="table-card">
+        {% if livraisons|length > 0 %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Zone</th>
+                        <th>Livreur</th>
+                        <th>Prix Livraison</th>
+                        <th>Prix Commande</th>
+                        <th>Total</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for livraison in livraisons %}
+                        {% set commande = livraison.commande %}
+                        {% set prixCommande = commande ? commande.prix : 0 %}
+                        {% set total = prixCommande + livraison.prix %}
+                        
+                        <tr>
+                            <td>
+                                <strong>{{ livraison.code }}</strong>
+                                <br>
+                                <small>ID: {{ livraison.id }}</small>
+                            </td>
+                            <td>
+                                <span class="badge badge-zone">
+                                    {{ livraison.zone.nom }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if livraison.livreur %}
+                                    {{ livraison.livreur.nom }}
+                                    <br>
+                                    <small>{{ livraison.livreur.telephone }}</small>
+                                {% else %}
+                                    <span class="text-muted">Non affecté</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong class="price-livraison">{{ livraison.prix }} FCFA</strong>
+                            </td>
+                            <td>
+                                {% if commande %}
+                                    <span class="price-commande">{{ prixCommande }} FCFA</span>
+                                    <br>
+                                    <small>Cmd: {{ commande.code }}</small>
+                                {% else %}
+                                    <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong class="price-total">{{ total }} FCFA</strong>
+                            </td>
+                            <td>
+                                {{ livraison.createdAt|default('now')|date('d/m/Y') }}
+                                <br>
+                                <small>{{ livraison.createdAt|default('now')|date('H:i') }}</small>
+                            </td>
+                            <td class="actions-cell">
+                                <a href="{{ path('app_livraisons_show', {'id': livraison.id}) }}" 
+                                   class="btn btn-sm btn-info" title="Voir détails">
+                                    👁️
+                                </a>
+                                <a href="#" class="btn btn-sm btn-warning"
+                                   onclick="alert('Fonctionnalité en cours de développement'); return false;">
+                                    ✏️
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <h3>Aucune livraison trouvée</h3>
+                <p>Commencez par affecter des commandes à des livreurs.</p>
+                <a href="{{ path('app_livraisons_affecter') }}" class="btn btn-primary">
+                    📦 Affecter des commandes
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    {# === ACTIONS RAPIDES === #}
+    <div class="quick-actions">
+        <a href="{{ path('app_dashboard') }}" class="btn btn-secondary">
+            ← Retour au tableau de bord
+        </a>
+        <a href="{{ path('app_commandes_index') }}" class="btn btn-secondary">
+            📝 Voir les commandes
+        </a>
+    </div>
+</div>
+{% endblock %}

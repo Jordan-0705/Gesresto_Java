@@ -1,0 +1,271 @@
+{# templates/commande/show.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Commande {{ commande.code }} - GesResto{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/commande/show.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    {# === EN-TÊTE === #}
+    <div class="page-header">
+        <h1>Commande {{ commande.code }}</h1>
+        <div class="header-actions">
+            <a href="{{ path('app_commandes_index') }}" class="btn btn-secondary">
+                ← Retour à la liste
+            </a>
+            <span class="status-badge status-{{ commande.etatCommande|lower|replace({' ': '-'}) }}">
+                {{ commande.etatCommande }}
+            </span>
+        </div>
+    </div>
+
+    {# === INFORMATIONS GÉNÉRALES === #}
+    <div class="info-grid">
+        <div class="info-card">
+            <h3>📋 Informations</h3>
+            <div class="info-list">
+                <div class="info-item">
+                    <span class="info-label">ID :</span>
+                    <span class="info-value">{{ commande.id }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Date :</span>
+                    <span class="info-value">{{ commande.date|date('d/m/Y H:i') }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Type :</span>
+                    <span class="info-value badge {{ commande.commandeType == 'Burger' ? 'badge-burger' : 'badge-menu' }}">
+                        {{ commande.commandeType }}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Consommation :</span>
+                    <span class="info-value badge {{ commande.consoType|replace({' ': '-'})|lower }}">
+                        {{ commande.consoType }}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Client :</span>
+                    <span class="info-value">Client #{{ commande.clientId }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Total :</span>
+                    <span class="info-value price">{{ commande.prix }} FCFA</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h3>🚚 Livraison</h3>
+            <div class="info-list">
+                <div class="info-item">
+                    <span class="info-label">Zone :</span>
+                    <span class="info-value">
+                        {% if commande.zone %}
+                            {{ commande.zone.nom }}
+                        {% else %}
+                            <span class="text-muted">Non affectée</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Livreur :</span>
+                    <span class="info-value">
+                        {% if commande.livreur %}
+                            {{ commande.livreur.nom }} ({{ commande.livreur.code }})
+                        {% else %}
+                            <span class="text-muted">Non affecté</span>
+                        {% endif %}
+                    </span>
+                </div>
+                {% if commande.consoType == 'À Livrer' %}
+                    <div class="info-item">
+                        <span class="info-label">Prix livraison :</span>
+                        <span class="info-value">
+                            {% if commande.zone %}
+                                {{ commande.zone.prix|default('0') }} FCFA
+                            {% else %}
+                                <span class="text-muted">À définir</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# === DÉTAILS DE LA COMMANDE === #}
+    <div class="details-section">
+        <h2>🍽️ Détails de la commande</h2>
+        
+        {% if commande.commandeType == 'Burger' %}
+            <div class="products-list">
+                <h4>Burgers commandés</h4>
+                {% if commande.commandeBurgers|length > 0 %}
+                    <table class="products-table">
+                        <thead>
+                            <tr>
+                                <th>Burger</th>
+                                <th>Frites</th>
+                                <th>Boisson</th>
+                                <th>Quantité</th>
+                                <th>Sous-total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cb in commande.commandeBurgers %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ cb.burger.nom }}</strong><br>
+                                        <small>{{ cb.burger.prix }} FCFA</small>
+                                    </td>
+                                    <td>
+                                        {% if cb.complementF %}
+                                            {{ cb.complementF.nom }}<br>
+                                            <small>{{ cb.complementF.prix }} FCFA</small>
+                                        {% else %}
+                                            <span class="text-muted">Aucune</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if cb.complementB %}
+                                            {{ cb.complementB.nom }}<br>
+                                            <small>{{ cb.complementB.prix }} FCFA</small>
+                                        {% else %}
+                                            <span class="text-muted">Aucune</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ cb.quantite }}</td>
+                                    <td>
+                                        <strong>
+                                            {% set sousTotal = cb.burger.prix * cb.quantite %}
+                                            {% if cb.complementF %}
+                                                {% set sousTotal = sousTotal + (cb.complementF.prix * cb.quantite) %}
+                                            {% endif %}
+                                            {% if cb.complementB %}
+                                                {% set sousTotal = sousTotal + (cb.complementB.prix * cb.quantite) %}
+                                            {% endif %}
+                                            {{ sousTotal }} FCFA
+                                        </strong>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-muted">Aucun burger dans cette commande</p>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="products-list">
+                <h4>Menus commandés</h4>
+                {% if commande.commandeMenus|length > 0 %}
+                    <table class="products-table">
+                        <thead>
+                            <tr>
+                                <th>Menu</th>
+                                <th>Burger</th>
+                                <th>Frites</th>
+                                <th>Boisson</th>
+                                <th>Quantité</th>
+                                <th>Sous-total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cm in commande.commandeMenus %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ cm.menu.nom }}</strong><br>
+                                        <small>{{ cm.menu.prix }} FCFA</small>
+                                    </td>
+                                    <td>{{ cm.menu.burger.nom }}</td>
+                                    <td>
+                                        {% if cm.menu.frites %}
+                                            {{ cm.menu.frites.nom }}
+                                        {% else %}
+                                            <span class="text-muted">Aucune</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if cm.menu.boisson %}
+                                            {{ cm.menu.boisson.nom }}
+                                        {% else %}
+                                            <span class="text-muted">Aucune</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ cm.quantite }}</td>
+                                    <td>
+                                        <strong>{{ cm.menu.prix * cm.quantite }} FCFA</strong>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-muted">Aucun menu dans cette commande</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    {# === PAIEMENTS === #}
+    <div class="payments-section">
+        <h2>💰 Paiements</h2>
+        {% if commande.paiements|length > 0 %}
+            <div class="payments-list">
+                {% for paiement in commande.paiements %}
+                    <div class="payment-card">
+                        <div class="payment-header">
+                            <span class="payment-type">{{ paiement.paiementType }}</span>
+                            <span class="payment-date">{{ paiement.date|date('d/m/Y H:i') }}</span>
+                        </div>
+                        <div class="payment-body">
+                            <span class="payment-amount">{{ paiement.montant }} FCFA</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted">Aucun paiement enregistré pour cette commande</p>
+        {% endif %}
+    </div>
+
+    {# === ACTIONS === #}
+    <div class="actions-section">
+        <h2>⚡ Actions</h2>
+        <div class="actions-grid">
+            {% if commande.etatCommande == 'En Attente' %}
+                <a href="{{ path('app_commandes_changer_etat', {'id': commande.id, 'nouvelEtat': 'Validé'}) }}"
+                   class="btn btn-success">
+                    ✅ Valider la commande
+                </a>
+            {% endif %}
+            
+            {% if commande.etatCommande == 'Validé' %}
+                <a href="{{ path('app_commandes_changer_etat', {'id': commande.id, 'nouvelEtat': 'Terminé'}) }}"
+                   class="btn btn-success">
+                    🏁 Marquer comme terminé
+                </a>
+                
+                {% if commande.consoType == 'À Livrer' %}
+                    <button class="btn btn-primary" onclick="alert('Affecter à une livraison - Fonctionnalité à venir')">
+                        🚚 Affecter à une livraison
+                    </button>
+                {% endif %}
+            {% endif %}
+            
+            {% if commande.etatCommande != 'Annulé' %}
+                <a href="{{ path('app_commandes_changer_etat', {'id': commande.id, 'nouvelEtat': 'Annulé'}) }}"
+                   class="btn btn-danger"
+                   onclick="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?')">
+                    ❌ Annuler la commande
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

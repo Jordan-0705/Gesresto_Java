@@ -1,0 +1,211 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de Bord & Statistiques - GesResto{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/dashboard/index.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="main-banner">
+    <div class="banner-text">
+        <h1>Tableau de Bord & Statistiques</h1>
+        <p>
+            Bienvenue {{ app.user.nomComplet|default(app.user.nom) }} ! Voici les statistiques de votre restaurant pour aujourd'hui.
+        </p>
+        <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.9); border-radius: 8px;">
+            <strong>📅 Date :</strong> {{ today|date('d/m/Y') }} | 
+            <strong>👤 Gestionnaire :</strong> {{ app.user.nomComplet|default(app.user.nom) }}
+        </div>
+    </div>
+</div>
+
+{# === SECTION 1: STATISTIQUES PRINCIPALES === #}
+<div class="dashboard-section">
+    <h2 class="section-title">📊 Vue d'ensemble de la journée</h2>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #4cafef;">📋</div>
+            <div class="stat-content">
+                <h3>Commandes en cours</h3>
+                <p class="stat-number">{{ commandes_en_cours }}</p>
+                <p class="stat-detail">En attente de traitement</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #28a745;">✅</div>
+            <div class="stat-content">
+                <h3>Commandes validées</h3>
+                <p class="stat-number">{{ commandes_validees }}</p>
+                <p class="stat-detail">Prêtes à être préparées</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #ffc107;">💰</div>
+            <div class="stat-content">
+                <h3>Recettes journalières</h3>
+                <p class="stat-number">{{ recettes_journalieres|number_format(0, ',', ' ') }} FCFA</p>
+                <p class="stat-detail">Chiffre d'affaires du jour</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #dc3545;">❌</div>
+            <div class="stat-content">
+                <h3>Commandes annulées</h3>
+                <p class="stat-number">{{ commandes_annulees }}</p>
+                <p class="stat-detail">Annulations aujourd'hui</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# === SECTION 2: PRODUITS LES PLUS VENDUS === #}
+<div class="dashboard-section">
+    <h2 class="section-title">🍔 Produits les plus vendus aujourd'hui</h2>
+    
+    <div class="products-grid">
+        <div class="product-card">
+            <h3 style="color: #1c2b6b; border-bottom: 2px solid #4cafef; padding-bottom: 10px;">
+                🍔 Burgers les plus populaires
+            </h3>
+            {% if burgers_plus_vendus|length > 0 %}
+                <ul class="product-list">
+                {% for burger in burgers_plus_vendus %}
+                    <li>
+                        <span class="product-name">{{ burger.burger_nom }}</span>
+                        <span class="product-quantity">{{ burger.total_vendu }} vendu(s)</span>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p class="no-data">Aucun burger vendu aujourd'hui</p>
+            {% endif %}
+        </div>
+        
+        <div class="product-card">
+            <h3 style="color: #1c2b6b; border-bottom: 2px solid #28a745; padding-bottom: 10px;">
+                🍽️ Menus les plus populaires
+            </h3>
+            {% if menus_plus_vendus|length > 0 %}
+                <ul class="product-list">
+                {% for menu in menus_plus_vendus %}
+                    <li>
+                        <span class="product-name">{{ menu.menu_nom }}</span>
+                        <span class="product-quantity">{{ menu.total_vendu }} vendu(s)</span>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p class="no-data">Aucun menu vendu aujourd'hui</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# === SECTION 3: LIVRAISONS EN ATTENTE === #}
+<div class="dashboard-section">
+    <h2 class="section-title">🚚 Livraisons à organiser</h2>
+    
+    <div class="delivery-card">
+        <div class="delivery-header">
+            <div class="delivery-count">{{ commandes_a_livrer }} commande(s) à livrer</div>
+            <div class="delivery-action">
+                {% if commandes_a_livrer > 0 %}
+                    <a href="#" class="nav-btn" onclick="alert('Fonctionnalité en cours de développement'); return false;">
+                        Organiser les livraisons
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if commandes_a_livrer_list|length > 0 %}
+            <div class="delivery-list">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Client</th>
+                            <th>Zone</th>
+                            <th>Prix</th>
+                            <th>Heure</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for commande in commandes_a_livrer_list %}
+                        <tr>
+                            <td><strong>{{ commande.code }}</strong></td>
+                            <td>Client #{{ commande.clientId }}</td>
+                            <td>
+                                {% if commande.zone %}
+                                    {{ commande.zone.nom }}
+                                {% else %}
+                                    <span style="color: #dc3545;">Non affectée</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ commande.prix }} FCFA</td>
+                            <td>{{ commande.date|date('H:i') }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="no-data" style="text-align: center; padding: 30px; color: #6c757d;">
+                Aucune commande à livrer pour le moment
+            </p>
+        {% endif %}
+    </div>
+</div>
+
+{# === SECTION 4: COMMANDES EN COURS === #}
+<div class="dashboard-section">
+    <h2 class="section-title">⏳ Commandes en cours de traitement</h2>
+    
+    {% if commandes_en_cours_list|length > 0 %}
+        <div class="orders-list">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Type</th>
+                        <th>Consommation</th>
+                        <th>Total</th>
+                        <th>État</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for commande in commandes_en_cours_list %}
+                    <tr>
+                        <td><strong>{{ commande.code }}</strong></td>
+                        <td>{{ commande.commandeType }}</td>
+                        <td>{{ commande.consoType }}</td>
+                        <td>{{ commande.prix }} FCFA</td>
+                        <td>
+                            <span class="status-badge status-{{ commande.etatCommande|lower|replace({' ': '-'}) }}">
+                                {{ commande.etatCommande }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-primary" 
+                               onclick="alert('Fonctionnalité en cours de développement'); return false;">
+                                Traiter
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="no-data" style="text-align: center; padding: 30px; color: #6c757d;">
+            Aucune commande en cours pour le moment
+        </p>
+    {% endif %}
+</div>
+{% endblock %}

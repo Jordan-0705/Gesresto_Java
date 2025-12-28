@@ -1,0 +1,288 @@
+{# templates/commande/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Commandes - GesResto{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/commande/index.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    {# === EN-TÊTE === #}
+    <div class="page-header">
+        <h1>📝 Gestion des Commandes</h1>
+        <p class="subtitle">Consultez, filtrez et gérez toutes les commandes de votre restaurant</p>
+    </div>
+
+    {# === FILTRES === #}
+    <div class="filters-card">
+        <h2>🔍 Filtres de recherche</h2>
+        
+        <form method="get" action="{{ path('app_commandes_index') }}" class="filters-form">
+            <div class="filters-grid">
+                {# Filtre par état #}
+                <div class="filter-group">
+                    <label for="etat">État :</label>
+                    <select name="etat" id="etat" class="form-control">
+                        <option value="">Tous les états</option>
+                        {% for etatOption in etats %}
+                            <option value="{{ etatOption }}" {{ current_filters.etat == etatOption ? 'selected' : '' }}>
+                                {{ etatOption }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {# Filtre par date #}
+                <div class="filter-group">
+                    <label for="date">Date :</label>
+                    <input type="date" name="date" id="date" 
+                           value="{{ current_filters.date }}" 
+                           class="form-control">
+                </div>
+
+                {# Filtre par client #}
+                <div class="filter-group">
+                    <label for="client">Client :</label>
+                    <select name="client" id="client" class="form-control">
+                        <option value="">Tous les clients</option>
+                        {% for client in clients %}
+                            <option value="{{ client.id }}" {{ current_filters.client == client.id ? 'selected' : '' }}>
+                                {{ client.nom }} ({{ client.code }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {# Filtre par type #}
+                <div class="filter-group">
+                    <label for="type">Type :</label>
+                    <select name="type" id="type" class="form-control">
+                        <option value="">Burger ou Menu</option>
+                        <option value="Burger" {{ current_filters.type == 'Burger' ? 'selected' : '' }}>Burger</option>
+                        <option value="Menu" {{ current_filters.type == 'Menu' ? 'selected' : '' }}>Menu</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-actions">
+                <button type="submit" class="btn btn-primary">
+                    🔍 Appliquer les filtres
+                </button>
+                <a href="{{ path('app_commandes_index') }}" class="btn btn-secondary">
+                    🗑️ Réinitialiser
+                </a>
+            </div>
+        </form>
+    </div>
+
+    {# === STATISTIQUES RAPIDES === #}
+    <div class="quick-stats">
+        <div class="stat-item">
+            <span class="stat-label">Total commandes :</span>
+            <span class="stat-value">{{ total_commandes }}</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Page :</span>
+            <span class="stat-value">{{ page }}/{{ total_pages }}</span>
+        </div>
+        {% if current_filters.etat %}
+            <div class="stat-item">
+                <span class="stat-label">État filtré :</span>
+                <span class="stat-value">{{ current_filters.etat }}</span>
+            </div>
+        {% endif %}
+    </div>
+
+    {# === TABLEAU DES COMMANDES === #}
+    <div class="table-card">
+        {% if commandes|length > 0 %}
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Date</th>
+                        <th>Client</th>
+                        <th>Type</th>
+                        <th>Consommation</th>
+                        <th>Total</th>
+                        <th>État</th>
+                        <th>Zone</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for commande in commandes %}
+                        <tr>
+                            <td>
+                                <strong>{{ commande.code }}</strong>
+                                <br>
+                                <small>ID: {{ commande.id }}</small>
+                            </td>
+                            <td>
+                                {{ commande.date|date('d/m/Y') }}
+                                <br>
+                                <small>{{ commande.date|date('H:i') }}</small>
+                            </td>
+                            <td>
+                                Client #{{ commande.clientId }}
+                            </td>
+                            <td>
+                                <span class="badge {{ commande.commandeType == 'Burger' ? 'badge-burger' : 'badge-menu' }}">
+                                    {{ commande.commandeType }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge {{ commande.consoType|replace({' ': '-'})|lower }}">
+                                    {{ commande.consoType }}
+                                </span>
+                            </td>
+                            <td>
+                                <strong>{{ commande.prix }} FCFA</strong>
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ commande.etatCommande|lower|replace({' ': '-'}) }}">
+                                    {{ commande.etatCommande }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if commande.zone %}
+                                    {{ commande.zone.nom }}
+                                {% else %}
+                                    <span class="text-muted">Non affectée</span>
+                                {% endif %}
+                            </td>
+                            <td class="actions-cell">
+                                <a href="{{ path('app_commandes_show', {'id': commande.id}) }}" 
+                                   class="btn btn-sm btn-info" title="Voir détails">
+                                    👁️
+                                </a>
+                                
+                                {% if commande.etatCommande != 'Termine' and commande.etatCommande != 'Annule' %}
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-primary dropdown-toggle" 
+                                                type="button">
+                                            ⚡
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            {% if commande.etatCommande == 'En Attente' %}
+                                                <a class="dropdown-item" 
+                                                   href="{{ path('app_commandes_changer_etat', {'id': commande.id, 'nouvelEtat': 'Valide'}) }}">
+                                                    ✅ Valider
+                                                </a>
+                                            {% endif %}
+                                            
+                                            {% if commande.etatCommande == 'Valide' %}
+                                                <a class="dropdown-item" 
+                                                   href="{{ path('app_commandes_changer_etat', {'id': commande.id, 'nouvelEtat': 'Termine'}) }}">
+                                                    🏁 Terminer
+                                                </a>
+                                            {% endif %}
+                                            
+                                            <a class="dropdown-item" 
+                                               href="{{ path('app_commandes_changer_etat', {'id': commande.id, 'nouvelEtat': 'Annule'}) }}"
+                                               onclick="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?')">
+                                                ❌ Annuler
+                                            </a>
+                                            
+                                            {% if commande.consoType == 'À Livrer' and commande.etatCommande == 'Valide' %}
+                                                <div class="dropdown-divider"></div>
+                                                <a class="dropdown-item" href="#"
+                                                   onclick="alert('Fonctionnalité en cours de développement'); return false;">
+                                                    🚚 Affecter à une livraison
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {# === PAGINATION === #}
+            {% if total_pages > 1 %}
+                <nav class="pagination">
+                    <ul class="pagination-list">
+                        {% if page > 1 %}
+                            <li>
+                                <a href="{{ path('app_commandes_index', {page: page - 1, etat: current_filters.etat, date: current_filters.date, client: current_filters.client, type: current_filters.type}) }}"
+                                   class="pagination-link">
+                                    ← Précédent
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for p in range(max(1, page - 2), min(total_pages, page + 2)) %}
+                            <li>
+                                <a href="{{ path('app_commandes_index', {page: p, etat: current_filters.etat, date: current_filters.date, client: current_filters.client, type: current_filters.type}) }}"
+                                   class="pagination-link {{ p == page ? 'active' : '' }}">
+                                    {{ p }}
+                                </a>
+                            </li>
+                        {% endfor %}
+
+                        {% if page < total_pages %}
+                            <li>
+                                <a href="{{ path('app_commandes_index', {page: page + 1, etat: current_filters.etat, date: current_filters.date, client: current_filters.client, type: current_filters.type}) }}"
+                                   class="pagination-link">
+                                    Suivant →
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <h3>Aucune commande trouvée</h3>
+                <p>Aucune commande ne correspond à vos critères de recherche.</p>
+                <a href="{{ path('app_commandes_index') }}" class="btn btn-primary">
+                    Voir toutes les commandes
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    {# === ACTIONS RAPIDES === #}
+    <div class="quick-actions">
+        <a href="{{ path('app_dashboard') }}" class="btn btn-secondary">
+            ← Retour au tableau de bord
+        </a>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Confirmation pour l'annulation
+        document.querySelectorAll('a[href*="changer-etat/Annule"]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                if (!confirm('Êtes-vous sûr de vouloir annuler cette commande ?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+        
+        // Gestion simple du dropdown
+        const dropdowns = document.querySelectorAll('.dropdown');
+        
+        dropdowns.forEach(dropdown => {
+            const toggle = dropdown.querySelector('.dropdown-toggle');
+            const menu = dropdown.querySelector('.dropdown-menu');
+            
+            toggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+            });
+            
+            // Fermer le dropdown quand on clique ailleurs
+            document.addEventListener('click', function() {
+                menu.style.display = 'none';
+            });
+        });
+    });
+</script>
+{% endblock %}

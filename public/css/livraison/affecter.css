@@ -1,0 +1,275 @@
+/* === STYLES SPÉCIFIQUES AFFECTATION === */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.page-header {
+    margin-bottom: 30px;
+}
+
+.page-header h1 {
+    color: #1c2b6b;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.subtitle {
+    color: #6c757d;
+    font-size: 1.1rem;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.header-actions {
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* === FORMULAIRE === */
+.form-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+}
+
+.form-card h2 {
+    color: #1c2b6b;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f4ff;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 1rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border 0.3s, box-shadow 0.3s;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    outline: none;
+}
+
+.form-text {
+    display: block;
+    margin-top: 8px;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* === COMMANDES PAR ZONE === */
+.commandes-section {
+    margin: 30px 0;
+}
+
+.commandes-section h3 {
+    color: #1c2b6b;
+    margin-bottom: 20px;
+}
+
+.zones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.zone-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    border: 2px solid transparent;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.zone-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    border-color: #0d6efd;
+}
+
+.zone-card.selected {
+    border-color: #0d6efd;
+    background: #e7f1ff;
+}
+
+.zone-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.zone-header h4 {
+    margin: 0;
+    color: #1c2b6b;
+    font-size: 1.1rem;
+}
+
+.zone-count {
+    background: #4cafef;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.zone-prix {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    padding: 5px 0;
+}
+
+.zone-prix.total {
+    border-top: 2px solid #dee2e6;
+    margin-top: 10px;
+    padding-top: 10px;
+    font-weight: bold;
+}
+
+.prix-label {
+    color: #6c757d;
+}
+
+.prix-value {
+    font-weight: 600;
+    color: #1c2b6b;
+}
+
+.zone-prix.total .prix-value {
+    color: #198754;
+    font-size: 1.1rem;
+}
+
+.commandes-list {
+    margin-top: 15px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.commande-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    background: white;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.commande-code {
+    font-weight: 500;
+    color: #333;
+}
+
+.commande-prix {
+    color: #198754;
+    font-weight: 500;
+}
+
+/* === ÉTAT VIDE === */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.empty-state .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.empty-state h4 {
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: #6c757d;
+    margin-bottom: 20px;
+}
+
+/* === ACTIONS DU FORMULAIRE === */
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #dee2e6;
+}
+
+.btn-lg {
+    padding: 12px 30px;
+    font-size: 1.1rem;
+}
+
+/* === CARTE D'INFORMATIONS === */
+.info-card {
+    background: #f0f8ff;
+    border-radius: 12px;
+    padding: 25px;
+    border-left: 4px solid #4cafef;
+}
+
+.info-card h3 {
+    color: #1c2b6b;
+    margin-bottom: 20px;
+}
+
+.info-list {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.info-list li {
+    margin-bottom: 10px;
+    color: #333;
+    line-height: 1.5;
+}
+
+.info-list li:last-child {
+    margin-bottom: 0;
+}

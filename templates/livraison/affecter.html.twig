@@ -1,0 +1,180 @@
+{# templates/livraison/affecter.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Affecter des Commandes - GesResto{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/livraison/affecter.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    {# === EN-TÊTE === #}
+    <div class="page-header">
+        <h1>📦 Regrouper les commandes par zone</h1>
+        <p class="subtitle">Sélectionnez une zone et un livreur pour affecter les commandes</p>
+        
+        <div class="header-actions">
+            <a href="{{ path('app_livraisons_index') }}" class="btn btn-secondary">
+                ← Retour aux livraisons
+            </a>
+        </div>
+    </div>
+
+    {# === FORMULAIRE D'AFFECTATION === #}
+    <div class="form-card">
+        <h2>🔧 Créer une nouvelle livraison</h2>
+        
+        <form method="post" action="{{ path('app_livraisons_creer') }}" class="affectation-form">
+            <div class="form-grid">
+                {# Sélection de la zone #}
+                <div class="form-group">
+                    <label for="zone_id" class="form-label">
+                        🗺️ Zone de livraison :
+                    </label>
+                    <select name="zone_id" id="zone_id" class="form-control" required>
+                        <option value="">Sélectionnez une zone</option>
+                        {% for zone in zones %}
+                            <option value="{{ zone.id }}">
+                                {{ zone.nom }} 
+                                {% set prixLivraison = '1000' %}
+                                {% for nomZone, prix in prixParZone %}
+                                    {% if zone.nom matches '/' ~ nomZone ~ '/' %}
+                                        {% set prixLivraison = prix %}
+                                    {% endif %}
+                                {% endfor %}
+                                - {{ prixLivraison }} FCFA
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <small class="form-text">
+                        Prix de livraison selon la zone : 
+                        Zone 1 = 500 FCFA, Zone 2 = 1000 FCFA, Zone 3 = 1500 FCFA, 
+                        Zone 4 = 2000 FCFA, Zone 5 = 2500 FCFA
+                    </small>
+                </div>
+
+                {# Sélection du livreur #}
+                <div class="form-group">
+                    <label for="livreur_id" class="form-label">
+                        🚴 Livreur :
+                    </label>
+                    <select name="livreur_id" id="livreur_id" class="form-control" required>
+                        <option value="">Sélectionnez un livreur</option>
+                        {% for livreur in livreurs %}
+                            <option value="{{ livreur.id }}">
+                                {{ livreur.nom }} ({{ livreur.code }}) - {{ livreur.telephone }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            {# === COMMANDES DISPONIBLES PAR ZONE === #}
+            <div class="commandes-section">
+                <h3>📋 Commandes disponibles par zone</h3>
+                
+                {% if commandesParZone|length > 0 %}
+                    <div class="zones-grid">
+                        {% for item in commandesParZone %}
+                            <div class="zone-card" data-zone-id="{{ item.zone.id }}">
+                                <div class="zone-header">
+                                    <h4>{{ item.zone.nom }}</h4>
+                                    <span class="zone-count">{{ item.count }} commande(s)</span>
+                                </div>
+                                
+                                <div class="zone-prix">
+                                    <span class="prix-label">Prix livraison :</span>
+                                    <span class="prix-value">{{ item.prix_livraison }} FCFA</span>
+                                </div>
+                                
+                                <div class="zone-prix">
+                                    <span class="prix-label">Total commandes :</span>
+                                    <span class="prix-value">{{ item.total_commandes|number_format(0, ',', ' ') }} FCFA</span>
+                                </div>
+                                
+                                <div class="zone-prix total">
+                                    <span class="prix-label">Total général :</span>
+                                    <span class="prix-value">
+                                        {{ item.total_general|number_format(0, ',', ' ') }} FCFA
+                                    </span>
+                                </div>
+                                
+                                <div class="commandes-list">
+                                    {% for commande in item.commandes %}
+                                        <div class="commande-item">
+                                            <span class="commande-code">{{ commande.code }}</span>
+                                            <span class="commande-prix">{{ commande.prix }} FCFA</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">📭</div>
+                        <h4>Aucune commande à livrer</h4>
+                        <p>Toutes les commandes ont déjà été affectées à des livreurs.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            {# === BOUTONS D'ACTION === #}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg" 
+                        {% if commandesParZone|length == 0 %}disabled{% endif %}>
+                    🚚 Affecter les commandes
+                </button>
+                <a href="{{ path('app_livraisons_index') }}" class="btn btn-secondary">
+                    Annuler
+                </a>
+            </div>
+        </form>
+    </div>
+
+    {# === INFORMATIONS === #}
+    <div class="info-card">
+        <h3>ℹ️ Comment ça marche ?</h3>
+        <ol class="info-list">
+            <li>Sélectionnez une zone de livraison</li>
+            <li>Choisissez un livreur disponible</li>
+            <li>Cliquez sur "Affecter les commandes"</li>
+            <li>Toutes les commandes "À Livrer" de cette zone seront affectées au livreur</li>
+            <li>Une nouvelle livraison sera créée avec le prix correspondant à la zone</li>
+        </ol>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const zoneSelect = document.getElementById('zone_id');
+    const zoneCards = document.querySelectorAll('.zone-card');
+    
+    // Surligner la zone sélectionnée
+    zoneSelect.addEventListener('change', function() {
+        const selectedZoneId = this.value;
+        
+        zoneCards.forEach(card => {
+            if (card.dataset.zoneId === selectedZoneId) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+        });
+    });
+    
+    // Sélectionner une zone en cliquant sur la carte
+    zoneCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const zoneId = this.dataset.zoneId;
+            zoneSelect.value = zoneId;
+            
+            // Déclencher l'événement change
+            zoneSelect.dispatchEvent(new Event('change'));
+        });
+    });
+});
+</script>
+{% endblock %}
