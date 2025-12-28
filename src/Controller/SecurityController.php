@@ -9,7 +9,7 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
 {
-    #[Route(path: '/login', name: 'app_login')]
+    #[Route(path: ['/', '/login'], name: 'app_login', priority: 10)]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
         // Si l'utilisateur est déjà connecté, rediriger vers le dashboard
