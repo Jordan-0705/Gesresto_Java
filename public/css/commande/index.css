@@ -404,3 +404,46 @@
     color: #6c757d !important;
     font-style: italic;
 }
+
+/* === PAGINATION AMÉLIORÉE === */
+.pagination-simple {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.pagination-dot {
+    transition: all 0.3s;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.pagination-dot:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.pagination-dot.active {
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+/* === RESPONSIVE PAGINATION === */
+@media (max-width: 768px) {
+    .pagination-simple > div:first-child {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .pagination-dot {
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 0.8rem;
+    }
+}

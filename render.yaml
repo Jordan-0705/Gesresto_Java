@@ -1,0 +1,18 @@
+# render.yaml
+services:
+  - type: web
+    name: gesresto
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: APP_ENV
+        value: prod
+      - key: APP_SECRET
+        generateValue: true
+      # Utilise les variables d'environnement pour Neon
+      - key: DATABASE_URL
+        sync: false  # Ne pas synchroniser, défini manuellement
+    healthCheckPath: /
+    autoDeploy: true

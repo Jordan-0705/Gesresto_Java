@@ -1,0 +1,206 @@
+{# templates/livraison/show.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails Livraison #{{ livraison.code }} - GesResto{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/livraison/show.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    {# === EN-TÊTE === #}
+    <div class="page-header">
+        <div>
+            <a href="{{ path('app_livraisons_index') }}" class="btn-back">
+                ← Retour aux livraisons
+            </a>
+            <h1>📋 Détails de la Livraison</h1>
+            <p class="subtitle">Code: <strong>{{ livraison.code }}</strong> | ID: {{ livraison.id }}</p>
+        </div>
+        <div class="header-actions">
+            <span class="badge badge-zone">
+                {{ livraison.zone ? livraison.zone.nom : 'Sans zone' }}
+            </span>
+        </div>
+    </div>
+
+    {# === GRID INFORMATIONS === #}
+    <div class="info-grid">
+        {# === INFORMATIONS LIVRAISON === #}
+        <div class="info-card">
+            <h3>🚚 Informations Livraison</h3>
+            <div class="info-list">
+                <div class="info-item">
+                    <span class="info-label">Code:</span>
+                    <span class="info-value badge-code">{{ livraison.code }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Zone:</span>
+                    <span class="info-value badge-zone">
+                        {{ livraison.zone ? livraison.zone.nom : 'Non définie' }}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Prix Livraison:</span>
+                    <span class="info-value price-livraison">{{ livraison.prix }} FCFA</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Date création:</span>
+                    <span class="info-value">
+                        {{ livraison.createdAt ? livraison.createdAt|date('d/m/Y H:i') : 'N/A' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        {# === LIVREUR === #}
+        <div class="info-card">
+            <h3>👤 Livreur</h3>
+            {% if livraison.livreur %}
+                <div class="livreur-card">
+                    <div class="livreur-header">
+                        <h3>{{ livraison.livreur.nom }}</h3>
+                        <span class="badge-code">{{ livraison.livreur.code }}</span>
+                    </div>
+                    <div class="livreur-info">
+                        {% if livraison.livreur.telephone %}
+                            <p><strong>📞 Téléphone:</strong> {{ livraison.livreur.telephone }}</p>
+                        {% else %}
+                            <p class="text-muted">Aucun téléphone renseigné</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="empty-livreur">
+                    <span class="empty-icon">🚫</span>
+                    <p>Aucun livreur affecté</p>
+                    <a href="{{ path('app_livraisons_affecter', {'id': livraison.id}) }}" 
+                       class="btn btn-sm btn-primary mt-2">
+                        Affecter un livreur
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        {# === COMMANDE ASSOCIÉE === #}
+        <div class="info-card" style="grid-column: span 2;">
+            <h3>📦 Commande associée</h3>
+            {% if livraison.commande %}
+                {% set commande = livraison.commande %}
+                <div class="commande-card">
+                    <div class="commande-header">
+                        <h3>Commande #{{ commande.code }}</h3>
+                        <span class="badge-status">{{ commande.etatCommande }}</span>
+                    </div>
+                    
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="info-label">ID Client:</span>
+                            <span class="info-value">#{{ commande.clientId }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Type:</span>
+                            <span class="info-value">{{ commande.commandeType }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Consommation:</span>
+                            <span class="info-value">{{ commande.consoType }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Prix commande:</span>
+                            <span class="info-value price-commande">{{ commande.prix }} FCFA</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Date commande:</span>
+                            <span class="info-value">{{ commande.date|date('d/m/Y H:i') }}</span>
+                        </div>
+                    </div>
+
+                    {# === ARTICLES === #}
+                    {% if commande.commandeBurgers|length > 0 or commande.commandeMenus|length > 0 %}
+                        <div class="articles-section">
+                            <h4>📋 Articles commandés</h4>
+                            
+                            {# Burgers #}
+                            {% if commande.commandeBurgers|length > 0 %}
+                                <div class="articles-list">
+                                    <h5>🍔 Burgers</h5>
+                                    {% for cb in commande.commandeBurgers %}
+                                        <div class="article-item">
+                                            <span>{{ cb.burger.nom }} x{{ cb.quantite }}</span>
+                                            <span class="price">{{ cb.burger.prix * cb.quantite }} FCFA</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            {# Menus #}
+                            {% if commande.commandeMenus|length > 0 %}
+                                <div class="articles-list">
+                                    <h5>🍽️ Menus</h5>
+                                    {% for cm in commande.commandeMenus %}
+                                        <div class="article-item">
+                                            <span>{{ cm.menu.nom }} x{{ cm.quantite }}</span>
+                                            <span class="price">{{ cm.menu.prix * cm.quantite }} FCFA</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    {# === TOTAL === #}
+                    <div class="total-section">
+                        <div class="total-line">
+                            <span>Prix commande:</span>
+                            <span class="price-commande">{{ commande.prix }} FCFA</span>
+                        </div>
+                        <div class="total-line">
+                            <span>Frais livraison:</span>
+                            <span class="price-livraison">{{ livraison.prix }} FCFA</span>
+                        </div>
+                        <div class="total-line total">
+                            <strong>Total à payer:</strong>
+                            <strong class="price-total">{{ commande.prix + livraison.prix }} FCFA</strong>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <p>Aucune commande associée</p>
+                    <a href="{{ path('app_commandes_index') }}" class="btn btn-sm btn-primary mt-2">
+                        Voir les commandes
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# === ACTIONS === #}
+    <div class="actions-section">
+        <h2>⚡ Actions</h2>
+        <div class="actions-grid">
+            <a href="{{ path('app_livraisons_index') }}" class="btn btn-secondary">
+                ← Retour à la liste
+            </a>
+            
+            {% if not livraison.livreur %}
+                <a href="{{ path('app_livraisons_affecter', {'id': livraison.id}) }}" 
+                   class="btn btn-primary">
+                    👤 Affecter un livreur
+                </a>
+            {% endif %}
+            
+            {% if livraison.commande %}
+                <a href="{{ path('app_commandes_show', {'id': livraison.commande.id}) }}" 
+                   class="btn btn-info">
+                    📦 Voir la commande
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
