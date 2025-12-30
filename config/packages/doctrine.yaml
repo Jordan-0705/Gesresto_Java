@@ -2,10 +2,14 @@ doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
         server_version: '15'
-        profiling_collect_backtrace: '%kernel.debug%'
 
+        # IMPORTANT: You MUST configure your server version,
+        # either here or in the DATABASE_URL env var (see .env file)
+        #server_version: '16'
+
+        profiling_collect_backtrace: '%kernel.debug%'
     orm:
-        auto_generate_proxy_classes: true
+        validate_xml_mapping: true
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
         identity_generation_preferences:
             Doctrine\DBAL\Platforms\PostgreSQLPlatform: identity
@@ -17,6 +21,8 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Entity'
                 prefix: 'App\Entity'
                 alias: App
+        controller_resolver:
+            auto_mapping: false
 
 when@test:
     doctrine:

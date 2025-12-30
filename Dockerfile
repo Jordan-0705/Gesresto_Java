@@ -1,6 +1,6 @@
 FROM php:8.4-apache
 
-# 1. Dépendances système requises
+# Dépendances système
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     git \
@@ -10,30 +10,33 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Apache DocumentRoot (Symfony)
+# Apache → public/
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
     && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
 
-# 3. Installer Composer
+# Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# 4. Copier le projet
+# Projet
 WORKDIR /var/www/html
 COPY . .
 
-# 5. Installer les dépendances Symfony
+# 🔥 FORCER PROD AVANT COMPOSER
+ENV APP_ENV=prod
+ENV APP_DEBUG=0
+
+# Dépendances Symfony
 RUN composer install \
     --no-dev \
     --optimize-autoloader \
     --no-interaction
 
-# 6. Permissions
+# Permissions
 RUN chown -R www-data:www-data /var/www/html
 
-# 7. Port Render
+# Port Render
 EXPOSE 8080
 RUN sed -i 's/Listen 80/Listen 8080/' /etc/apache2/ports.conf
 
-# 8. Lancement
 CMD ["apache2-foreground"]
