@@ -25,11 +25,12 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-av
 # --------------------------------------
 # 3. Autoriser l’accès (fix 403)
 # --------------------------------------
-RUN echo '<Directory "/var/www/html/public">\n\
+RUN echo 'ServerName localhost\n\
+<Directory "/var/www/html/public">\n\
+    Options Indexes FollowSymLinks\n\
     AllowOverride All\n\
     Require all granted\n\
-</Directory>\n\
-ServerName localhost' > /etc/apache2/conf-available/symfony.conf \
+</Directory>' > /etc/apache2/conf-available/symfony.conf \
     && a2enconf symfony
 
 # --------------------------------------
