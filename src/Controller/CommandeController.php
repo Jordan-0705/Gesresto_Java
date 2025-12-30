@@ -68,7 +68,7 @@ class CommandeController extends AbstractController
 
         // Pagination
         $page = $request->query->getInt('page', 1);
-        $limit = 20;
+        $limit = 5;
         $offset = ($page - 1) * $limit;
 
         $totalCommandes = count($qb->getQuery()->getResult());

@@ -49,9 +49,6 @@ class AuthAuthenticator extends AbstractLoginFormAuthenticator
                 if (!$gestionnaire) {
                     throw new CustomUserMessageAuthenticationException('Login incorrect.');
                 }
-
-                // Vérifier le mot de passe (en clair pour l'instant)
-                // Plus tard, vous pourrez utiliser password_hash()
                 return $gestionnaire;
             }),
             new PasswordCredentials($password),
@@ -67,7 +64,6 @@ class AuthAuthenticator extends AbstractLoginFormAuthenticator
             return new RedirectResponse($targetPath);
         }
 
-        // Redirection vers le tableau de bord après connexion réussie
         return new RedirectResponse($this->urlGenerator->generate('app_dashboard'));
     }
 

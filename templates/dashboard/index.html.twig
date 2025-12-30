@@ -116,7 +116,7 @@
             <div class="delivery-count">{{ commandes_a_livrer }} commande(s) à livrer</div>
             <div class="delivery-action">
                 {% if commandes_a_livrer > 0 %}
-                    <a href="#" class="nav-btn" onclick="alert('Fonctionnalité en cours de développement'); return false;">
+                    <a href="{{ path('app_livraisons_index') }}" class="nav-btn" >
                         Organiser les livraisons
                     </a>
                 {% endif %}

@@ -25,7 +25,6 @@ class DashboardController extends AbstractController
         $startOfDay = $today->setTime(0, 0, 0);
         $endOfDay = $today->setTime(23, 59, 59);
         
-        // 1. Commandes en cours de la journée (état "En Attente")
         $commandesEnCours = $commandeRepository->createQueryBuilder('c')
             ->where('c.etatCommande = :etat')
             ->andWhere('c.date BETWEEN :start AND :end')
@@ -35,7 +34,6 @@ class DashboardController extends AbstractController
             ->getQuery()
             ->getResult();
         
-        // 2. Commandes validées de la journée
         $commandesValidees = $commandeRepository->createQueryBuilder('c')
             ->where('c.etatCommande = :etat')
             ->andWhere('c.date BETWEEN :start AND :end')
@@ -45,7 +43,6 @@ class DashboardController extends AbstractController
             ->getQuery()
             ->getResult();
         
-        // 3. Recettes journalières (somme des paiements du jour)
         $recettesJournalieres = $paiementRepository->createQueryBuilder('p')
             ->select('SUM(p.montant) as total')
             ->where('p.date BETWEEN :start AND :end')
@@ -54,7 +51,6 @@ class DashboardController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult() ?? 0;
         
-        // 4. Burgers les plus vendus de la journée
         $burgersPlusVendus = $commandeBurgerRepository->createQueryBuilder('cb')
             ->join('cb.burger', 'b')
             ->join('cb.commande', 'c')
@@ -68,7 +64,6 @@ class DashboardController extends AbstractController
             ->getQuery()
             ->getResult();
         
-        // 5. Menus les plus vendus de la journée
         $menusPlusVendus = $commandeMenuRepository->createQueryBuilder('cm')
             ->join('cm.menu', 'm')
             ->join('cm.commande', 'c')
@@ -82,7 +77,6 @@ class DashboardController extends AbstractController
             ->getQuery()
             ->getResult();
         
-        // 6. Commandes annulées du jour
         $commandesAnnulees = $commandeRepository->createQueryBuilder('c')
             ->where('c.etatCommande = :etat')
             ->andWhere('c.date BETWEEN :start AND :end')
@@ -92,7 +86,6 @@ class DashboardController extends AbstractController
             ->getQuery()
             ->getResult();
         
-        // 7. Commandes à livrer (pour la section livraisons)
         $commandesALivrer = $commandeRepository->createQueryBuilder('c')
             ->where('c.consoType = :type')
             ->andWhere('c.etatCommande = :etat')
@@ -108,7 +101,6 @@ class DashboardController extends AbstractController
             'gestionnaire' => $this->getUser(),
             'today' => $today,
             
-            // Statistiques
             'commandes_en_cours' => count($commandesEnCours),
             'commandes_validees' => count($commandesValidees),
             'recettes_journalieres' => $recettesJournalieres,
@@ -117,7 +109,6 @@ class DashboardController extends AbstractController
             'commandes_annulees' => count($commandesAnnulees),
             'commandes_a_livrer' => count($commandesALivrer),
             
-            // Données détaillées
             'commandes_en_cours_list' => $commandesEnCours,
             'commandes_a_livrer_list' => $commandesALivrer,
         ]);

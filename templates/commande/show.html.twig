@@ -258,8 +258,8 @@
                 {% endif %}
             {% endif %}
             
-            {% if commande.etatCommande != 'Annulé' %}
-                <a href="{{ path('app_commandes_changer_etat', {'id': commande.id, 'nouvelEtat': 'Annulé'}) }}"
+            {% if commande.etatCommande != 'Annule' %}
+                <a href="{{ path('app_commandes_changer_etat', {'id': commande.id, 'nouvelEtat': 'Annule'}) }}"
                    class="btn btn-danger"
                    onclick="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?')">
                     ❌ Annuler la commande

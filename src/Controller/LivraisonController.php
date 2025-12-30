@@ -42,7 +42,6 @@ class LivraisonController extends AbstractController
         $zones = $zoneRepository->findAll();
         $livreurs = $livreurRepository->findAll();
 
-        // Prix par zone
         $prixParZone = [
             'Zone 1' => '500',
             'Zone 2' => '1000',
@@ -51,10 +50,9 @@ class LivraisonController extends AbstractController
             'Zone 5' => '2500',
         ];
 
-        // Préparer les zones avec leurs prix
         $zonesAvecPrix = [];
         foreach ($zones as $zone) {
-            $prix = '1000'; // Par défaut
+            $prix = '1000';
             foreach ($prixParZone as $nomZone => $prixZone) {
                 if (strpos($zone->getNom(), $nomZone) !== false) {
                     $prix = $prixZone;
@@ -68,12 +66,10 @@ class LivraisonController extends AbstractController
             ];
         }
 
-        // Récupérer les commandes par zone
         $commandesParZone = [];
         foreach ($zones as $zone) {
             $commandes = $commandeRepository->findCommandesALivrerParZone($zone->getId());
             if (count($commandes) > 0) {
-                // Déterminer le prix pour cette zone
                 $prixLivraison = '1000';
                 foreach ($prixParZone as $nomZone => $prix) {
                     if (strpos($zone->getNom(), $nomZone) !== false) {
@@ -97,7 +93,7 @@ class LivraisonController extends AbstractController
             'zones' => $zones,
             'livreurs' => $livreurs,
             'commandesParZone' => $commandesParZone,
-            'prixParZone' => $prixParZone, // Passer les prix au template
+            'prixParZone' => $prixParZone,
         ]);
     }
 
@@ -123,7 +119,6 @@ class LivraisonController extends AbstractController
             return $this->redirectToRoute('app_livraisons_affecter');
         }
 
-        // Récupérer les commandes à livrer pour cette zone
         $commandes = $commandeRepository->findCommandesALivrerParZone($zoneId);
 
         if (count($commandes) === 0) {
@@ -131,47 +126,36 @@ class LivraisonController extends AbstractController
             return $this->redirectToRoute('app_livraisons_affecter');
         }
 
-        // === ÉTAPE 1: Créer la livraison avec un code temporaire ===
         $livraison = new Livraison();
         
-        // Code temporaire en attendant l'ID
         $tempCode = 'LIV-TEMP-' . date('His');
         $livraison->setCode($tempCode);
         
         $livraison->setZone($zone);
         $livraison->setLivreur($livreur);
         
-        // Calculer le prix de la livraison selon la zone
         $prixLivraison = $this->getPrixLivraisonParZone($zone->getNom());
         $livraison->setPrix($prixLivraison);
 
-        // Définir la première commande comme référence
         if (count($commandes) > 0) {
             $livraison->setCommande($commandes[0]);
         }
 
-        // Sauvegarder pour obtenir l'ID
         $entityManager->persist($livraison);
         $entityManager->flush();
 
-        // === ÉTAPE 2: Maintenant qu'on a l'ID, générer le vrai code ===
         $vraiCode = 'LIV-' . str_pad($livraison->getId(), 2, '0', STR_PAD_LEFT);
         $livraison->setCode($vraiCode);
-
-        // === ÉTAPE 3: Affecter les commandes ===
         $totalCommandes = 0;
         foreach ($commandes as $commande) {
-            // Affecter le livreur à la commande
             $commande->setLivreur($livreur);
             $commande->setLivraison($livraison);
             
-            // Ajouter le prix de la commande au total
             $totalCommandes += (float) $commande->getPrix();
             
             $entityManager->persist($commande);
         }
 
-        // === ÉTAPE 4: Sauvegarder les modifications ===
         $entityManager->flush();
 
         $this->addFlash('success', sprintf(
@@ -190,11 +174,9 @@ class LivraisonController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_GESTIONNAIRE');
 
-        // Récupérer toutes les commandes de cette livraison (par zone et livreur à la même date)
         $commandes = $commandeRepository->findBy([
             'zone' => $livraison->getZone(),
             'livreur' => $livraison->getLivreur(),
-            // On pourrait aussi filtrer par date si nécessaire
         ]);
 
         $totalCommandes = array_sum(array_map(fn($c) => (float) $c->getPrix(), $commandes));
@@ -208,9 +190,6 @@ class LivraisonController extends AbstractController
         ]);
     }
 
-    /**
-     * Détermine le prix de livraison selon la zone
-     */
     private function getPrixLivraisonParZone(string $nomZone): string
     {
         $prixParZone = [
@@ -221,19 +200,16 @@ class LivraisonController extends AbstractController
             'Zone 5' => '2500',
         ];
 
-        // Chercher par nom exact
         if (isset($prixParZone[$nomZone])) {
             return $prixParZone[$nomZone];
         }
 
-        // Chercher par pattern (si le nom contient "Zone 1", etc.)
         foreach ($prixParZone as $zone => $prix) {
             if (strpos($nomZone, $zone) !== false) {
                 return $prix;
             }
         }
 
-        // Par défaut
         return '1000';
     }
 }
