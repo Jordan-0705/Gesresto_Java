@@ -7,7 +7,6 @@ var/
 vendor/
 node_modules/
 public/bundles/
-.env
 .env.local
 .env.*.local
 !.env.prod

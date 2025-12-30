@@ -1,37 +1,26 @@
-# Dockerfile CORRIGÉ
+# Dockerfile
 FROM php:8.4-apache
 
-# Installer les extensions (version simplifiée)
-RUN apt-get update && apt-get install -y \
-    libpng-dev libzip-dev libpq-dev \
-    && docker-php-ext-install pdo pdo_pgsql gd zip \
-    && a2enmod rewrite
+# 1. Installer les extensions
+RUN docker-php-ext-install pdo pdo_pgsql && a2enmod rewrite
 
-# Installer Composer
+# 2. Installer Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Configurer Apache pour Symfony
+# 3. Configurer Apache
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
-    && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 
-# Copier l'application
+# 4. Copier l'application (ton .env sera copié automatiquement)
 COPY . /var/www/html
 WORKDIR /var/www/html
 
-# Installer les dépendances PHP (SIMPLIFIÉ)
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# 5. Installer les dépendances SANS exécuter les scripts problématiques
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
-# Configurer les permissions
-RUN chown -R www-data:www-data /var/www/html/var \
-    && chmod -R 775 /var/www/html/var
-
-# Port pour Render
+# 6. Port Render
 EXPOSE 8080
+RUN sed -i 's/Listen 80/Listen 8080/' /etc/apache2/ports.conf
 
-# Configurer le port 8080 (CORRIGÉ)
-RUN sed -i 's/Listen 80/Listen 8080/g' /etc/apache2/ports.conf \
-    && sed -i 's/:80/:8080/g' /etc/apache2/sites-available/*.conf
-
-# Démarrer Apache
+# 7. Démarrer
 CMD ["apache2-foreground"]
