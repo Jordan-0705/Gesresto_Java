@@ -10,10 +10,17 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Apache → public/
+# Apache → Symfony public/
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
     && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
+
+# 🔥 AUTORISER L’ACCÈS (FIX 403)
+RUN echo '<Directory "/var/www/html/public">\n\
+    AllowOverride All\n\
+    Require all granted\n\
+</Directory>' > /etc/apache2/conf-available/symfony.conf \
+    && a2enconf symfony
 
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -22,7 +29,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 COPY . .
 
-# 🔥 FORCER PROD AVANT COMPOSER
+# Forcer PROD
 ENV APP_ENV=prod
 ENV APP_DEBUG=0
 
